@@ -1,6 +1,7 @@
-import { PLAYER_CREATED } from "../event-types";
+import { PLAYER_CREATED, PLAYER_DELETED } from "../event-types";
 export default {
     createPlayer: (state, {payload: {name, email, avatar}}) => {
+      console.log("Create player")
       if (state.createdAt) throw new Error("The player already exists")
       if (!name) throw new Error("name is required")
       if (!email) throw new Error("email is required")
@@ -9,6 +10,16 @@ export default {
       return {
         type: PLAYER_CREATED,
         payload: {name, email, avatar}
+      }
+    },
+    deletePlayer: (state) =>
+    {
+      if (!state.createdAt) {
+        throw new Error('Player does not exist')
+      }
+  
+      return {
+        type: PLAYER_DELETED
       }
     }
   }

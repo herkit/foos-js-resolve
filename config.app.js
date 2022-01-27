@@ -7,11 +7,17 @@ const appConfig = {
     }
   ],
   readModels: [
+    {
+      name: 'players',
+      projection: 'common/read-models/players.projection.js',
+      resolvers: 'common/read-models/players.resolvers.js',
+      connectorName: 'default'
+    }
   ],
   viewModels: [
     {
-      name: 'PlayerList',
-      projection: 'common/view-models/player.projection.js',
+      name: 'PlayerMatches',
+      projection: 'common/view-models/player-matches.projection.js',
     },
   ],
   clientEntries: [

@@ -2,7 +2,7 @@ import React from 'react'
 import { Helmet } from 'react-helmet'
 import { Navbar, Image } from 'react-bootstrap'
 import { useStaticResolver } from '@resolve-js/react-hooks'
-import { MyAggregateList } from '../components/MyAggregateList'
+import { PlayerList } from '../components/PlayerList'
 const App = () => {
   const staticResolver = useStaticResolver()
   const bootstrapLink = {
@@ -27,6 +27,7 @@ const App = () => {
   }
   return (
     <div>
+      test
       <Helmet title="reSolve Application" link={links} meta={[meta]} />
       <Navbar>
         <Navbar.Brand href="#home">
@@ -38,7 +39,7 @@ const App = () => {
         </Navbar.Brand>
       </Navbar>
       <div className="content-wrapper">
-        <MyAggregateList />
+        <PlayerList />
       </div>
     </div>
   )
