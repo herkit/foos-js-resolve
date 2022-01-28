@@ -4,6 +4,11 @@ const appConfig = {
       name: "Player",
       commands: 'common/aggregates/player.commands.js',
       projection: 'common/aggregates/player.projection.js'
+    },
+    {
+      name: "Match",
+      commands: 'common/aggregates/match.commands.js',
+      projection: 'common/aggregates/match.projection.js'
     }
   ],
   readModels: [

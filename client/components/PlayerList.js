@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import { v4 as uuid } from 'uuid'
 import { useQuery, useCommand } from '@resolve-js/react-hooks'
-import { Button } from 'react-bootstrap'
 import PlayerDeleter from './PlayerDeleter'
+import PlayerCreate from './PlayerCreate'
 import { ThemeConsumer } from 'react-bootstrap/esm/ThemeProvider'
 const PlayerList = () => {
   const [players, setPlayers] = useState([])
-  const [name, nameInput] = useInput({ type: "text", className: "form-control" })
-  const [email, emailInput] = useInput({ type: "email", className: "form-control" })
-  const [avatar, avatarInput] = useInput({ type: "text", className: "form-control" })
   const getPlayers = useQuery(
     { name: 'players', resolver: 'all', args: {} },
     (error, result) => {
@@ -18,69 +14,46 @@ const PlayerList = () => {
   useEffect(() => {
     getPlayers()
   }, [])
-  const createPlayer = useCommand(
-    {
-      type: 'createPlayer',
-      aggregateId: uuid(),
-      aggregateName: 'Player',
-      payload: { name: name, email: email, avatar: avatar },
-    },
-    (error, result, { aggregateId, payload: { name, email, avatar } }) => {
-      if (!error) 
-        setPlayers([
-          ...players,
-          {
-            id: aggregateId,
-            name: name,
-            email: email,
-            avatar: avatar,
-          },
-        ].sort(i => i.name))
-    }
-  )
-/*  const deleteAggregate = useCommand(
-    (id) => ({
-      type: 'delete',
-      aggregateId: id,
-      aggregateName: 'MyAggregate',
-    }),
-    (error, result, { aggregateId }) => {
-      setAggregates([
-        ...aggregates.filter((aggregate) => aggregate.id !== aggregateId),
-      ])
-    }
-  )*/
+
+  const onPlayerCreated = ({ playerId, payload: { name, email, avatar} }) => {
+    console.log("playerCreated", playerId, name, email, avatar )
+    setPlayers([
+      ...players,
+      {
+        id: playerId,
+        name: name,
+        email: email,
+        avatar: avatar,
+      },
+    ])
+  }
 
   return (
     <div>
-      {nameInput}
-      {emailInput}
-      {avatarInput}
-      <Button variant="success" onClick={() => createPlayer()}>
-        Create Player
-      </Button>
-      <div className="my-aggregates">
+      <PlayerCreate onCreateSuccess={onPlayerCreated}></PlayerCreate>
+      <table className='table table-condensed'>
+        <thead>
+          <tr><th>Name</th><th>Email</th></tr>
+        </thead>
+        <tbody>
         {players.map(({ id, name, email, avatar }) => (
-          <div key={id}>
-            <p className="lead">{name}</p>
-            <p>{email}</p>
-            <PlayerDeleter playerId={id} onRemoveSuccess={(err, result) => {
-              console.log("player deleted")
-              setPlayers(
-                players.filter((player) => player.id !== result.aggregateId)
-              )
-            }} />
-          </div>
+          <tr key={id}>
+            <td className="lead">{name}</td>
+            <td>{email}</td>
+            <td>
+              <PlayerDeleter playerId={id} size="sm" onRemoveSuccess={(err, result) => {
+                console.log("player deleted")
+                setPlayers(
+                  players.filter((player) => player.id !== result.aggregateId)
+                )
+              }} />
+            </td>
+          </tr>
         ))}
-      </div>
+        </tbody>
+      </table>
     </div>
   )
-}
-
-function useInput({ type, className }) {
-  const [value, setValue] = useState("");
-  const input = <input value={value} onChange={e => setValue(e.target.value)} type={type} className={className} />;
-  return [value, input];
 }
 
 export { PlayerList }

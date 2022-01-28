@@ -3,6 +3,9 @@ import { Helmet } from 'react-helmet'
 import { Navbar, Image } from 'react-bootstrap'
 import { useStaticResolver } from '@resolve-js/react-hooks'
 import { PlayerList } from '../components/PlayerList'
+import { SingleMatchCreate } from '../components/SingleMatchCreate'
+import { PlayerSelect } from '../components/PlayerSelect'
+
 const App = () => {
   const staticResolver = useStaticResolver()
   const bootstrapLink = {
@@ -40,6 +43,7 @@ const App = () => {
       </Navbar>
       <div className="content-wrapper">
         <PlayerList />
+        <PlayerSelect id="playerSelect" />
       </div>
     </div>
   )
