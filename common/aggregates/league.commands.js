@@ -8,7 +8,7 @@ export default {
         payload: { name }
       }
     },
-    startSeason: (state, { payload: {seasonid} }) => {
+    startSeason: (state, { payload: { seasonid } }) => {
       if (state.currentSeason === seasonid)
         throw new Error("Season is currently in progress")
       if (state.seasons.find(s => s === seasonid))

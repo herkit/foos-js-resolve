@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Helmet } from 'react-helmet'
 import { Navbar, Image } from 'react-bootstrap'
 import { useStaticResolver } from '@resolve-js/react-hooks'
@@ -7,9 +7,12 @@ import { SingleMatchCreate } from '../components/SingleMatchCreate'
 import { PlayerSelect } from '../components/PlayerSelect'
 import { DoubleMatchCreate } from '../components/DoubleMatchCreate'
 import { MatchRegistration } from '../components/MatchRegistration'
+import { LeagueCreate } from '../components/LeagueCreate'
+import { LeagueSelect } from '../components/LeagueSelect'
 
 const App = () => {
   const staticResolver = useStaticResolver()
+  const [league, setLeague] = useState()
   const bootstrapLink = {
     rel: 'stylesheet',
     type: 'text/css',
@@ -42,10 +45,21 @@ const App = () => {
           <span>{'Foos'}</span>
         </Navbar.Brand>
       </Navbar>
-      <div className="content-wrapper">
-        <PlayerList />
-        <MatchRegistration />
-      </div>
+      {(() => {
+        if (league) {
+          return <div className="content-wrapper">
+            <PlayerList />
+            <MatchRegistration league={league} />    
+          </div>
+        } 
+        else 
+        {
+          return <div className="content-wrapper">
+            <LeagueSelect onLeagueSelected={setLeague}></LeagueSelect>
+            <LeagueCreate onCreateSuccess={(league) => setLeague(league)}></LeagueCreate>
+          </div>
+        }
+      })()}        
     </div>
   )
 }
