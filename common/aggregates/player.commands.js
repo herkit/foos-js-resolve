@@ -1,4 +1,4 @@
-import { PLAYER_CREATED, PLAYER_DELETED } from "../event-types";
+import { PLAYER_CREATED, PLAYER_DELETED, PLAYER_WON_MATCH, PLAYER_LOST_MATCH } from "../event-types";
 export default {
     createPlayer: (state, {payload: {name, email, avatar}}) => {
       console.log("Create player")
@@ -14,12 +14,29 @@ export default {
     },
     deletePlayer: (state) =>
     {
-      if (!state.createdAt) {
+      if (!state.createdAt)
         throw new Error('Player does not exist')
-      }
   
       return {
         type: PLAYER_DELETED
+      }
+    },
+    registerWin: (state, {payload: { matchid, matchtype, score, coplayers, opponents, rank }}) => {
+      if (!state.createdAt)
+        throw new Error('Player does not exist')
+
+      return {
+        type: PLAYER_WON_MATCH,
+        payload: { matchid, matchtype, score, coplayers, opponents, rank }
+      }
+    },
+    registerLoss: (state, {payload: { matchid, matchtype, score, coplayers, opponents, rank }}) => {
+      if (!state.createdAt)
+        throw new Error('Player does not exist')
+
+      return {
+        type: PLAYER_LOST_MATCH,
+        payload: { matchid, matchtype, score, coplayers, opponents, rank }
       }
     }
   }

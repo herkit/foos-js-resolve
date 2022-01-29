@@ -4,16 +4,18 @@ import { v4 as uuid } from 'uuid'
 import { useCommand } from '@resolve-js/react-hooks'
 import { Button, Form } from "react-bootstrap";
 
-const SingleMatchCreate = ({ onDone }) => {
-  const [winner, setWinner] = useState()
-  const [loser, setLoser] = useState()
+const DoubleMatchCreate = ({ onDone }) => {
+  const [winner1, setWinner1] = useState()
+  const [winner2, setWinner2] = useState()
+  const [loser1, setLoser1] = useState()
+  const [loser2, setLoser2] = useState()
 
   const registerMatch = useCommand(
     {
-      type: 'registerSingleMatch',
+      type: 'registerDoubleMatch',
       aggregateId: uuid(),
       aggregateName: 'Match',
-      payload: { winner, loser },
+      payload: { winner1, winner2, loser1, loser2 },
     },
     (err, result) => {
       console.log(err, result)
@@ -29,18 +31,20 @@ const SingleMatchCreate = ({ onDone }) => {
 
   return (<Form>
     <Form.Group controlId="formWinner">
-      <Form.Label>Winner</Form.Label>
-      <PlayerSelect onSelected={(p) => setWinner(p)}></PlayerSelect>
+      <Form.Label>Winners</Form.Label>
+      <PlayerSelect onSelected={(p) => setWinner1(p)}></PlayerSelect>
+      <PlayerSelect onSelected={(p) => setWinner2(p)}></PlayerSelect>
     </Form.Group>
     <Form.Group controlId="formLoser">
-      <Form.Label>Loser</Form.Label>
-      <PlayerSelect onSelected={(p) => setLoser(p)}></PlayerSelect>
+      <Form.Label>Losers</Form.Label>
+      <PlayerSelect onSelected={(p) => setLoser1(p)}></PlayerSelect>
+      <PlayerSelect onSelected={(p) => setLoser2(p)}></PlayerSelect>
     </Form.Group>
     <Form.Group>
-      <Button onClick={registerMatch}>Add</Button> 
+      <Button onClick={registerMatch}>Add</Button>
       <Button onClick={cancelMatch}>Cancel</Button>
     </Form.Group>
   </Form>)
 }
 
-export { SingleMatchCreate }
+export { DoubleMatchCreate }

@@ -1,27 +1,30 @@
-import { PLAYER_CREATED, PLAYER_DELETED } from '../event-types'
+import { PLAYER_CREATED, PLAYER_DELETED, PLAYER_LOST_MATCH, PLAYER_WON_MATCH } from '../event-types'
 const readModel = {
   Init: async (store) => {
     await store.defineTable('Players', {
       indexes: {
-        id: 'string',
+        id: 'string'
       },
-      fields: ['name', 'email', 'avatar', 'rank'],
+      fields: ['name', 'email', 'avatar', 'currentRank'],
     })
   },
-  [PLAYER_CREATED]: async (
-    store,
-    { aggregateId, payload: { name, email, avatar, rank } }
-  ) => {
-    console.log(`update player {aggregateId}`)
+  [PLAYER_CREATED]: async (store, { aggregateId, payload: { name, email, avatar } }) => 
+  {
     await store.update(
       'Players',
       { id: aggregateId },
-      { $set: { name, email, avatar, rank } },
+      { $set: { name, email, avatar } },
       { upsert: true }
     )
   },
   [PLAYER_DELETED]: async (store, { aggregateId }) => {
     await store.delete('Players', { id: aggregateId })
   },
+  [PLAYER_LOST_MATCH]: async (store, { aggregateId, payload: { rank } }) => {
+    await store.update('Players', { id: aggregateId }, { $set: { currentRank: rank }})
+  },
+  [PLAYER_WON_MATCH]: async (store, { aggregateId, payload: { rank } }) => {
+    await store.update('Players', { id: aggregateId }, { $set: { currentRank: rank }})
+  }
 }
 export default readModel

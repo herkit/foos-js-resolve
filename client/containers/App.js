@@ -5,6 +5,8 @@ import { useStaticResolver } from '@resolve-js/react-hooks'
 import { PlayerList } from '../components/PlayerList'
 import { SingleMatchCreate } from '../components/SingleMatchCreate'
 import { PlayerSelect } from '../components/PlayerSelect'
+import { DoubleMatchCreate } from '../components/DoubleMatchCreate'
+import { MatchRegistration } from '../components/MatchRegistration'
 
 const App = () => {
   const staticResolver = useStaticResolver()
@@ -30,20 +32,19 @@ const App = () => {
   }
   return (
     <div>
-      test
-      <Helmet title="reSolve Application" link={links} meta={[meta]} />
+      <Helmet title="Foos" link={links} meta={[meta]} />
       <Navbar>
         <Navbar.Brand href="#home">
           <Image
             src={staticResolver('/resolve-logo.png')}
             className="d-inline-block align-top"
           />
-          <span>{'reSolve React Template'}</span>
+          <span>{'Foos'}</span>
         </Navbar.Brand>
       </Navbar>
       <div className="content-wrapper">
         <PlayerList />
-        <PlayerSelect id="playerSelect" />
+        <MatchRegistration />
       </div>
     </div>
   )
