@@ -21,22 +21,22 @@ export default {
         type: PLAYER_DELETED
       }
     },
-    registerWin: (state, {payload: { matchid, matchtype, score, coplayers, opponents, rank }}) => {
+    registerWin: (state, {payload: { season, matchid, matchtype, score, coplayers, opponents, rank }}) => {
       if (!state.createdAt)
         throw new Error('Player does not exist')
 
       return {
         type: PLAYER_WON_MATCH,
-        payload: { matchid, matchtype, score, coplayers, opponents, rank }
+        payload: { season, matchid, matchtype, score, coplayers, opponents, rank }
       }
     },
-    registerLoss: (state, {payload: { matchid, matchtype, score, coplayers, opponents, rank }}) => {
+    registerLoss: (state, {payload: { season, matchid, matchtype, score, coplayers, opponents, rank }}) => {
       if (!state.createdAt)
         throw new Error('Player does not exist')
 
       return {
         type: PLAYER_LOST_MATCH,
-        payload: { matchid, matchtype, score, coplayers, opponents, rank }
+        payload: { season, matchid, matchtype, score, coplayers, opponents, rank }
       }
     }
   }

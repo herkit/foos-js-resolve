@@ -2,7 +2,7 @@ import { SINGLEMATCH_PLAYED, DOUBLEMATCH_PLAYED } from "../event-types";
 import _ from "lodash";
 
 export default {
-    registerSingleMatch: (state, {payload: {winner, loser, season}}) => {
+    registerSingleMatch: (state, {payload: { winner, loser, season}}) => {
       if (state.playedAt) throw new Error("The match already exists")
       if (!winner) throw new Error("winner is required")
       if (!loser) throw new Error("loser is required")
@@ -12,7 +12,7 @@ export default {
         payload: {winner, loser, season}
       }
     },
-    registerDoubleMatch: (state, {payload: {winner1, winner2, loser1, loser2, season}}) =>
+    registerDoubleMatch: (state, {payload: { winner1, winner2, loser1, loser2, season}}) =>
     {
       if (state.playedAt) {
         throw new Error('Match already exist')

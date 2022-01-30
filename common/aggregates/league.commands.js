@@ -8,14 +8,14 @@ export default {
         payload: { name }
       }
     },
-    startSeason: (state, { payload: { seasonid } }) => {
+    startSeason: (state, { aggregateId, payload: { seasonid } }) => {
       if (state.currentSeason === seasonid)
         throw new Error("Season is currently in progress")
       if (state.seasons.find(s => s === seasonid))
         throw new Error("Season has been started before")
       return {
         type: SEASON_STARTED,
-        payload: { seasonid }
+        payload: { seasonid, leagueid: aggregateId }
       }
     }
   }

@@ -3,6 +3,7 @@ import { SINGLEMATCH_PLAYED, DOUBLEMATCH_PLAYED, PLAYER_LOST_MATCH, PLAYER_WON_M
 const PLAYERRANK = "PlayerRank";
 
 const singleMatchPlayed = async ({ store, sideEffects }, event) => {
+  const season = event.payload.season
   const winner = await store.findOne(PLAYERRANK, { playerid: event.payload.winner } )
   const loser = await store.findOne(PLAYERRANK, { playerid: event.payload.loser } )
 
@@ -25,18 +26,35 @@ const singleMatchPlayed = async ({ store, sideEffects }, event) => {
     aggregateName: "Player",
     aggregateId: event.payload.winner,
     type: "registerWin",
-    payload: { matchid: event.aggregateId, matchtype: "single", score: scoreChange, coplayers: [], opponents: [event.payload.loser], rank: winnerrank + scoreChange }
+    payload: { 
+      season,
+      matchid: event.aggregateId,
+      matchtype: "single", 
+      score: scoreChange, 
+      coplayers: [], 
+      opponents: [event.payload.loser], 
+      rank: winnerrank + scoreChange 
+    }
   })
 
   await sideEffects.executeCommand({
     aggregateName: "Player",
     aggregateId: event.payload.loser,
     type: "registerLoss",
-    payload: { matchid: event.aggregateId, matchtype: "single", score: scoreChange, coplayers: [], opponents: [event.payload.winner], rank: loserrank - scoreChange }
+    payload: { 
+      season,
+      matchid: event.aggregateId, 
+      matchtype: "single", 
+      score: scoreChange, 
+      coplayers: [], 
+      opponents: [event.payload.winner], 
+      rank: loserrank - scoreChange 
+    }
   })
 
   await store.update(PLAYERRANK, 
     {
+      season,
       playerid: event.payload.winner
     },
     {
@@ -46,6 +64,7 @@ const singleMatchPlayed = async ({ store, sideEffects }, event) => {
   )
   await store.update(PLAYERRANK, 
     {
+      season,
       playerid: event.payload.loser
     },
     {
@@ -56,6 +75,7 @@ const singleMatchPlayed = async ({ store, sideEffects }, event) => {
 }
 
 const doubleMatchPlayed = async ({ store, sideEffects }, event) => {
+  const season = event.payload.season
   const winner1 = await store.findOne(PLAYERRANK, { playerid: event.payload.winner1 } )
   const winner2 = await store.findOne(PLAYERRANK, { playerid: event.payload.winner2 } )
   const loser1 = await store.findOne(PLAYERRANK, { playerid: event.payload.loser1 } )
@@ -97,6 +117,7 @@ const doubleMatchPlayed = async ({ store, sideEffects }, event) => {
     aggregateId: event.payload.winner2,
     type: "registerWin",
     payload: { 
+      season,
       matchid: event.aggregateId, 
       matchtype: "double", 
       score: scoreChange, 
@@ -111,6 +132,7 @@ const doubleMatchPlayed = async ({ store, sideEffects }, event) => {
     aggregateId: event.payload.loser1,
     type: "registerLoss",
     payload: { 
+      season,
       matchid: event.aggregateId, 
       matchtype: "double", 
       score: - scoreChange, 
@@ -125,6 +147,7 @@ const doubleMatchPlayed = async ({ store, sideEffects }, event) => {
     aggregateId: event.payload.loser2,
     type: "registerLoss",
     payload: { 
+      season,
       matchid: event.aggregateId, 
       matchtype: "double", 
       score: - scoreChange, 
@@ -136,6 +159,7 @@ const doubleMatchPlayed = async ({ store, sideEffects }, event) => {
 
   await store.update(PLAYERRANK, 
     {
+      season,
       playerid: event.payload.winner1
     },
     {
@@ -146,6 +170,7 @@ const doubleMatchPlayed = async ({ store, sideEffects }, event) => {
 
   await store.update(PLAYERRANK, 
     {
+      season,
       playerid: event.payload.winner2
     },
     {
@@ -156,6 +181,7 @@ const doubleMatchPlayed = async ({ store, sideEffects }, event) => {
 
   await store.update(PLAYERRANK, 
     {
+      season,
       playerid: event.payload.loser1
     },
     {
@@ -166,6 +192,7 @@ const doubleMatchPlayed = async ({ store, sideEffects }, event) => {
 
   await store.update(PLAYERRANK, 
     {
+      season,
       playerid: event.payload.loser2
     },
     {
@@ -179,8 +206,8 @@ export default {
   handlers: {
     Init: async ({ store }) => {
       await store.defineTable(PLAYERRANK, {
-        indexes: { playerid: 'string' },
-        fields: ['rank'],
+        indexes: { },
+        fields: ['season', 'playerid', 'rank'],
       })
     },
     [SINGLEMATCH_PLAYED]: singleMatchPlayed,

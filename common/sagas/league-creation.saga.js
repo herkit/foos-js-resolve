@@ -6,7 +6,6 @@ export default {
     Init: async () => {
     },
     [LEAGUE_CREATED]: async ({sideEffects }, { aggregateId, payload: { name } }) => {
-      console.log("League created: " + name)
       await sideEffects.executeCommand({
         aggregateName: "League",
         aggregateId: aggregateId,

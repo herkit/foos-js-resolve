@@ -4,7 +4,7 @@ import { v4 as uuid } from 'uuid'
 import { useCommand } from '@resolve-js/react-hooks'
 import { Button, Form } from "react-bootstrap";
 
-const SingleMatchCreate = ({ onDone }) => {
+const SingleMatchCreate = ({ season, onDone }) => {
   const [winner, setWinner] = useState()
   const [loser, setLoser] = useState()
 
@@ -13,7 +13,7 @@ const SingleMatchCreate = ({ onDone }) => {
       type: 'registerSingleMatch',
       aggregateId: uuid(),
       aggregateName: 'Match',
-      payload: { winner, loser },
+      payload: { season, winner, loser },
     },
     (err, result) => {
       console.log(err, result)
