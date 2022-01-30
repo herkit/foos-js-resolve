@@ -9,6 +9,7 @@
     "dev": "babel-node run.js dev",
     "start": "babel-node run.js start",
     "test": "jest --verbose",
+    "module-admin": "module-admin",
     "test:e2e": "babel-node run.js test:e2e"
   },
   "resolutions": {
@@ -18,6 +19,7 @@
     "@resolve-js/core": "0.33.14",
     "@resolve-js/eventstore-lite": "0.33.14",
     "@resolve-js/eventstore-postgresql": "0.33.14",
+    "@resolve-js/module-admin": "0.33.14",
     "@resolve-js/react-hooks": "0.33.14",
     "@resolve-js/readmodel-base": "0.33.14",
     "@resolve-js/readmodel-lite": "0.33.14",

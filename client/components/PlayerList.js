@@ -6,7 +6,7 @@ import { ThemeConsumer } from 'react-bootstrap/esm/ThemeProvider'
 const PlayerList = () => {
   const [players, setPlayers] = useState([])
   const getPlayers = useQuery(
-    { name: 'players', resolver: 'all', args: {} },
+    { name: 'Players', resolver: 'all', args: {} },
     (error, result) => {
       setPlayers(result.data.sort(i => i.name))
     }

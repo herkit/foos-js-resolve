@@ -12,6 +12,7 @@ import appConfig from './config.app'
 import devConfig from './config.dev'
 import prodConfig from './config.prod'
 import cloudConfig from './config.cloud'
+import resolveModuleAdmin from '@resolve-js/module-admin'
 import testFunctionalConfig from './config.test-functional'
 import adjustWebpackConfigs from './config.adjust-webpack'
 const launchMode = process.argv[2]
@@ -19,7 +20,8 @@ void (async () => {
   try {
     switch (launchMode) {
       case 'dev': {
-        const resolveConfig = merge(defaultResolveConfig, appConfig, devConfig)
+        const moduleAdmin = resolveModuleAdmin()
+        const resolveConfig = merge(defaultResolveConfig, appConfig, devConfig, moduleAdmin)
         await watch(resolveConfig, adjustWebpackConfigs)
         break
       }
@@ -56,10 +58,12 @@ void (async () => {
         break
       }
       case 'test:e2e': {
+        const moduleAdmin = resolveModuleAdmin()
         const resolveConfig = merge(
           defaultResolveConfig,
           appConfig,
-          testFunctionalConfig
+          testFunctionalConfig,
+          moduleAdmin
         )
         await reset(
           resolveConfig,

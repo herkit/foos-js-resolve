@@ -5,7 +5,7 @@ const readModel = {
       indexes: {
         id: 'string'
       },
-      fields: ['name', 'currentSeason', 'seasons']
+      fields: ['name']
     })
   },
   [LEAGUE_CREATED]: async (store, { aggregateId, payload: { name } }) => 
@@ -16,7 +16,7 @@ const readModel = {
       { $set: { name } },
       { upsert: true }
     )
-  },
+  }/*,
   [SEASON_STARTED]: async (store, { aggregateId, timestamp, payload: { seasonid }}) => {
     const seasons = await store.findOne('Leagues', { id: aggregateId })?.seasons ?? [];
     await store.update(
@@ -29,6 +29,6 @@ const readModel = {
         }
       }      
     )
-  }
+  }*/
 }
 export default readModel

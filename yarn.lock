@@ -1547,6 +1547,18 @@
     pg "8.5.1"
     pg-cursor "2.7.1"
 
+"@resolve-js/module-admin@^0.33.14":
+  version "0.33.14"
+  resolved "https://registry.yarnpkg.com/@resolve-js/module-admin/-/module-admin-0.33.14.tgz#846558c9bc99fff97590ddc15949c14bd4ddddef"
+  integrity sha512-FAkCu/nW1W7T451Al7o0n9xh4Zepe7jeCQqycvdMRIyevn4IXCeFC92LNsWG3d21SysZyIcfcQftZoOsqB+NEg==
+  dependencies:
+    "@babel/runtime" "7.14.0"
+    "@resolve-js/eventstore-base" "0.33.14"
+    columnify "1.5.4"
+    dateformat "4.5.1"
+    isomorphic-fetch "3.0.0"
+    yargs "16.2.0"
+
 "@resolve-js/monitoring-aws-cloudwatch@0.33.14":
   version "0.33.14"
   resolved "https://registry.npmjs.org/@resolve-js/monitoring-aws-cloudwatch/-/monitoring-aws-cloudwatch-0.33.14.tgz"
@@ -3664,6 +3676,11 @@ dateformat@4.0.0:
   version "4.0.0"
   resolved "https://registry.npmjs.org/dateformat/-/dateformat-4.0.0.tgz"
   integrity sha512-zpKyDYpeePyYGJp2HhRxLHlA+jZQNjt+MwmcVmLxCIECeC4Ks3TI3yk/CSMKylbnCJ5htonfOugYtRRTpyoHow==
+
+dateformat@4.5.1:
+  version "4.5.1"
+  resolved "https://registry.yarnpkg.com/dateformat/-/dateformat-4.5.1.tgz#c20e7a9ca77d147906b6dc2261a8be0a5bd2173c"
+  integrity sha512-OD0TZ+B7yP7ZgpJf5K2DIbj3FZvFvxgFUuaqA/V5zTjAtAAXZ1E8bktHxmAGs4x5b7PflqA9LeQ84Og7wYtF7Q==
 
 debug@2.6.9, debug@^2.2.0, debug@^2.3.3:
   version "2.6.9"

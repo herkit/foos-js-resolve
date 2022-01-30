@@ -12,7 +12,7 @@ const PlayerSelect = ({player, onSelected}) => {
     setIsLoading(true)
     client.query(
       {
-        name: 'players',
+        name: 'Players',
         resolver: 'autocomplete',
         args: {
           term
