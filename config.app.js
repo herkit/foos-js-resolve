@@ -14,6 +14,11 @@ const appConfig = {
       name: "League",
       commands: 'common/aggregates/league.commands.js',
       projection: 'common/aggregates/league.projection.js'
+    },
+    {
+      name: "Season",
+      commands: 'common/aggregates/season.commands.js',
+      projection: 'common/aggregates/season.projection.js'
     }
   ],
   readModels: [
@@ -55,13 +60,17 @@ const appConfig = {
       name: 'LeagueData',
       projection: 'common/view-models/league.projection.js',
     },
+    {
+      name: 'SeasonRanks',
+      projection: 'common/view-models/season-ranks.projection.js'
+    }
   ],
   sagas: [
-    {
+    /*{
       name: "PlayerRank",
       source: 'common/sagas/playerrank.saga.js',
       connectorName: 'default',
-    },
+    },*/
     { 
       name: 'LeagueCreation', 
       source: 'common/sagas/league-creation.saga.js',

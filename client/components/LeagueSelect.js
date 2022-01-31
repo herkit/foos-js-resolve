@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useQuery } from '@resolve-js/react-hooks'
 import { Link } from 'react-router-dom'
+import { LeagueCreate } from './LeagueCreate'
 
 const LeagueSelect = ({ onLeagueSelected }) => {
   const [leagues, setLeagues] = useState([])
@@ -19,6 +20,7 @@ const LeagueSelect = ({ onLeagueSelected }) => {
     <div className="list-group">
     {leagues.map(({id, name}) => (<Link to={`/leagues/${id}`} className="list-group-item list-group-item-action" key={name}>{name}</Link>))}
     </div>
+    <LeagueCreate></LeagueCreate>
   </div>
   
   )

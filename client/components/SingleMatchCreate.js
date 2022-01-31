@@ -10,10 +10,10 @@ const SingleMatchCreate = ({ season, onDone }) => {
 
   const registerMatch = useCommand(
     {
-      type: 'registerSingleMatch',
-      aggregateId: uuid(),
-      aggregateName: 'Match',
-      payload: { season, winner, loser },
+      type: 'registerMatch',
+      aggregateId: season,
+      aggregateName: 'Season',
+      payload: { matchid: uuid(), winners: [winner], losers: [loser] },
     },
     (err, result) => {
       console.log(err, result)

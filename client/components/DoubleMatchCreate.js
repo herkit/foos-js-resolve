@@ -12,10 +12,10 @@ const DoubleMatchCreate = ({ season, onDone }) => {
 
   const registerMatch = useCommand(
     {
-      type: 'registerDoubleMatch',
-      aggregateId: uuid(),
-      aggregateName: 'Match',
-      payload: { season, winner1, winner2, loser1, loser2 },
+      type: 'registerMatch',
+      aggregateId: season,
+      aggregateName: 'Season',
+      payload: { matchid: uuid(), winners: [winner1, winner2], losers: [loser1, loser2] },
     },
     (err, result) => {
       console.log(err, result)
