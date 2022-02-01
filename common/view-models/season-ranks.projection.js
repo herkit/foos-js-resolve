@@ -12,8 +12,8 @@ const defaultRank = {
 }
 
 export default {
-  Init: () => ( {players: {} }),
-  [SEASON_MATCH_REGISTERED]: (state, { payload: { winners, losers } }) => {
+  Init: () => ( {players: {}, rankhistory: {} }),
+  [SEASON_MATCH_REGISTERED]: (state, { timestamp, payload: { winners, losers } }) => {
     const winnerranks = winners.map(player => state.players[player] ?? { id: player, ...defaultRank });
     const loserranks = losers.map(player => state.players[player] ?? { id: player, ...defaultRank });
     
@@ -35,37 +35,56 @@ export default {
     const scorePerWinner = scoreChange / winners.length;
     const scorePerLoser = scoreChange / losers.length;
 
+    const newRanks = [
+      ...winnerranks.map((p) => ({
+        ...p, 
+        rank: p.rank + scorePerWinner, 
+        played: p.played + 1,
+        winCount: p.winCount + 1,
+        winStreak: p.winStreak + 1,
+        longestWinStreak: Math.max(p.winStreak + 1, p.winStreak),
+        lossStreak: 0
+      })),
+      ...loserranks.map((p) => ({
+        ...p,
+        rank: p.rank - scorePerLoser, 
+        played: p.played + 1,
+        winStreak: 0, 
+        lossCount: p.lossCount + 1,
+        lossStreak: p.lossStreak + 1,
+        longestLossStreak: Math.max(p.lossStreak + 1, p.longestLossStreak, 0),
+      }))
+    ]
+
     const stateChanges = {
       ...state,
       players: {
         ...state.players,
-        ...winnerranks.reduce((prev, current) => (
+        ...newRanks.reduce((playersState, { id, rank, played, winCount, winStreak, longestWinStreak, lossCount, lossStreak, longestLossStreak}) => (
           {
-            ...prev, 
-            [current.id]: { 
-              ...current,
-              rank: current.rank + scorePerWinner, 
-              played: (current.played ?? 0) + 1,
-              winCount: (current.winCount ?? 0) + 1,
-              winStreak: (current.winStreak ?? 0) + 1, 
-              longestWinStreak: Math.max((current.winStreak ?? 0) + 1, (current.longestWinStreak ?? 0)),
-              lossStreak: 0,
-            }
-          }), {}),
-        ...loserranks.reduce((prev, current) => (
-          {
-            ...prev, 
-            [current.id]: { 
-              ...current,
-              id: current.id, 
-              rank: current.rank - scorePerLoser, 
-              played: (current.played ?? 0) + 1,
-              winStreak: 0, 
-              lossCount: (current.lossCount ?? 0) + 1,
-              lossStreak: (current.lossStreak ?? 0) + 1,
-              longestLossStreak: Math.max((current.lossStreak ?? 0) + 1, (current.longestLossStreak ?? 0), 0),
+            ...playersState,
+            [id]: { 
+              id,
+              rank, 
+              played,
+              winCount,
+              winStreak, 
+              longestWinStreak,
+              lossCount,
+              lossStreak,
+              longestLossStreak
             }
           }), {})
+      },
+      rankhistory: {
+        ...state.rankhistory,
+        ...newRanks.reduce((playersState, { id, rank }) => ({
+          ...playersState,
+          [id]: [
+            ...state.rankhistory[id] ?? [],
+            { timestamp, rank }
+          ]
+        }), {})
       }
     }
 
