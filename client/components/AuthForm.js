@@ -2,18 +2,15 @@ import React from 'react'
 import { Form } from 'react-bootstrap'
 
 const AuthForm = ({ title, action, buttonText }) => (
-  <div>
-    <h3>{title}</h3>
-    <Form action={action} method='POST'>
-      <Form.Group>
-        <div>Email:</div>
-        <input type="text" name="username" />
-
-        <div>Password:</div>
-        <input type="text" name="password" />
-      </Form.Group>
-      <input type="submit" value={buttonText} />
-    </Form>
-  </div>
+  <Form action={action} method='POST'>
+  <h1 className="h3 mb-3 font-weight-normal">{title}</h1>
+    <Form.Group>
+      <label htmlFor="inputEmail" className='sr-only'>Email address</label>
+      <input id="inputEmail" type="email" name="username" className='form-control' placeholder='Email address' required autoFocus autoComplete='off' />
+      <label htmlFor="inputPassword" className='sr-only'>Password</label>
+      <input id="inputPassword" type="password" name="password" className='form-control' placeholder='Password' required autoComplete='off' />
+    </Form.Group>
+    <button type="submit" className='btn btn-lg btn-primary btn-block'>{buttonText}</button>
+  </Form>
 )
 export { AuthForm }

@@ -8,14 +8,21 @@ import { Login } from './components/Login'
 import PlayerCreate from './components/PlayerCreate'
 import { PlayerList } from './components/PlayerList'
 import App from './containers/App'
+import SigninContainer from './containers/Signin'
+
+const Error = () => {
+  return (<div>Oops, something went wrong...</div>)
+}
 
 const AppRoutes = () => {
 
   return (
     <Routes>
+      <Route path="/" element={<SigninContainer />}>
+        <Route path="login" element={<Login />} />
+      </Route>
       <Route path="/" element={<App />}>
-        <Route path="" element={<LeagueCreate></LeagueCreate>} />
-        <Route path="login" element={<Login></Login>} />
+        <Route path="error" element={<Error />} />
         <Route path="leagues" element={<LeagueSelect />} />
         <Route path="leagues/create" element={<LeagueCreate />} />
         <Route path="leagues/:id" element={<LeagueView />} />
