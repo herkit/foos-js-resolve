@@ -4,6 +4,7 @@ import { Route, Routes } from 'react-router'
 import { LeagueCreate } from './components/LeagueCreate'
 import { LeagueSelect } from './components/LeagueSelect'
 import { LeagueView } from './components/LeagueView'
+import { Login } from './components/Login'
 import PlayerCreate from './components/PlayerCreate'
 import { PlayerList } from './components/PlayerList'
 import App from './containers/App'
@@ -14,6 +15,7 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/" element={<App />}>
         <Route path="" element={<LeagueCreate></LeagueCreate>} />
+        <Route path="login" element={<Login></Login>} />
         <Route path="leagues" element={<LeagueSelect />} />
         <Route path="leagues/create" element={<LeagueCreate />} />
         <Route path="leagues/:id" element={<LeagueView />} />

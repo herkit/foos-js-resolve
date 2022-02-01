@@ -5,15 +5,15 @@ const readModel = {
       indexes: {
         id: 'string'
       },
-      fields: ['name', 'email', 'avatar', 'currentRank'],
+      fields: ['name', 'email', 'password', 'avatar', 'currentRank'],
     })
   },
-  [PLAYER_CREATED]: async (store, { aggregateId, payload: { name, email, avatar } }) => 
+  [PLAYER_CREATED]: async (store, { aggregateId, payload: { name, email, avatar, password } }) => 
   {
     await store.update(
       'Players',
       { id: aggregateId },
-      { $set: { name, email, avatar } },
+      { $set: { name, email, avatar, password } },
       { upsert: true }
     )
   },

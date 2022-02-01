@@ -2,6 +2,16 @@ const resolvers = {
   all: async (store) => {
     return await store.find('Players', {}, null, { name: 1 })
   },
+  login: async (store, { email, password }) => {
+    if (!email || !password)
+      return null
+    return await store.findOne('Players', { email, password })
+  },
+  email: async (store, { email }) => {
+    if (!email)
+      return null
+    return await store.findOne('Players', { email })
+  },
   getById: async (store, { id }) => {
     console.log('Players.getById', id)
     return await store.findOne('Players', { id })

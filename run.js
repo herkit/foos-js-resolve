@@ -13,20 +13,48 @@ import devConfig from './config.dev'
 import prodConfig from './config.prod'
 import cloudConfig from './config.cloud'
 import resolveModuleAdmin from '@resolve-js/module-admin'
+import resolveModuleAuth from '@resolve-js/module-auth'
 import testFunctionalConfig from './config.test-functional'
 import adjustWebpackConfigs from './config.adjust-webpack'
 const launchMode = process.argv[2]
 void (async () => {
   try {
+    const moduleAuth = resolveModuleAuth([
+      {
+        name: 'local-strategy',
+        createStrategy: 'auth/create-strategy.js',
+        logoutRoute: {
+          path: 'logout',
+          method: 'POST',
+        },
+        routes: [
+          {
+            path: 'register',
+            method: 'POST',
+            callback: 'auth/route-register-callback.js',
+          },
+          {
+            path: 'login',
+            method: 'POST',
+            callback: 'auth/route-login-callback.js',
+          },
+        ],
+      },
+    ])
+    const baseConfig = merge(
+      defaultResolveConfig,
+      appConfig,
+      moduleAuth
+    )
     switch (launchMode) {
       case 'dev': {
         const moduleAdmin = resolveModuleAdmin()
-        const resolveConfig = merge(defaultResolveConfig, appConfig, devConfig, moduleAdmin)
+        const resolveConfig = merge(baseConfig, devConfig, moduleAdmin)
         await watch(resolveConfig, adjustWebpackConfigs)
         break
       }
       case 'reset': {
-        const resolveConfig = merge(defaultResolveConfig, appConfig, devConfig)
+        const resolveConfig = merge(baseConfig, devConfig)
         await reset(
           resolveConfig,
           {
@@ -41,18 +69,18 @@ void (async () => {
       }
       case 'build': {
         await build(
-          merge(defaultResolveConfig, appConfig, prodConfig),
+          merge(baseConfig, prodConfig),
           adjustWebpackConfigs
         )
         break
       }
       case 'start': {
-        await start(merge(defaultResolveConfig, appConfig, prodConfig))
+        await start(merge(baseConfig, prodConfig))
         break
       }
       case 'cloud': {
         await build(
-          merge(defaultResolveConfig, appConfig, cloudConfig),
+          merge(baseConfig, cloudConfig),
           adjustWebpackConfigs
         )
         break
@@ -60,8 +88,7 @@ void (async () => {
       case 'test:e2e': {
         const moduleAdmin = resolveModuleAdmin()
         const resolveConfig = merge(
-          defaultResolveConfig,
-          appConfig,
+          baseConfig,
           testFunctionalConfig,
           moduleAdmin
         )
