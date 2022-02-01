@@ -3,6 +3,7 @@ import { useQuery, useCommand } from '@resolve-js/react-hooks'
 import PlayerDeleter from './PlayerDeleter'
 import PlayerCreate from './PlayerCreate'
 import { ThemeConsumer } from 'react-bootstrap/esm/ThemeProvider'
+import { Outlet } from 'react-router'
 const PlayerList = () => {
   const [players, setPlayers] = useState([])
   const getPlayers = useQuery(
@@ -27,10 +28,9 @@ const PlayerList = () => {
       },
     ])
   }
-
+  /*<PlayerCreate onCreateSuccess={onPlayerCreated}></PlayerCreate>*/
   return (
     <div>
-      <PlayerCreate onCreateSuccess={onPlayerCreated}></PlayerCreate>
       <table className='table table-condensed'>
         <thead>
           <tr><th>Name</th><th>Email</th></tr>
@@ -52,6 +52,7 @@ const PlayerList = () => {
         ))}
         </tbody>
       </table>
+      <Outlet></Outlet>
     </div>
   )
 }

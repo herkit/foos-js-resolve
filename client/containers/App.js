@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet'
 import { Navbar, Image } from 'react-bootstrap'
 import { useStaticResolver } from '@resolve-js/react-hooks'
 import { Outlet } from 'react-router'
+import { Link } from 'react-router-dom'
 
 const App = () => {
   const staticResolver = useStaticResolver()
@@ -37,6 +38,8 @@ const App = () => {
           />
           <span>{'Foos'}</span>
         </Navbar.Brand>
+        <Link to={`/leagues`} className="p-2">Leagues</Link>
+        <Link to={`/players`} className="p-2">Players</Link>
       </Navbar>
       <div className="container">
         <Outlet></Outlet>
