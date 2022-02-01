@@ -4,6 +4,9 @@ import { useCommand } from '@resolve-js/react-hooks'
 
 const PlayerDeleter = ({ playerId, onRemoveSuccess, size }) => {
   var confirmTimeout;
+  const buttonStyle = {
+    width: "10ch"
+  }
   const [confirm, setConfirm] = useState(false);
   const deletePlayerCommand = useCommand(
     {
@@ -28,7 +31,7 @@ const PlayerDeleter = ({ playerId, onRemoveSuccess, size }) => {
     setConfirm(true)
   }
 
-  return confirm ? <Button onClick={deletePlayerCommand} className="btn-danger" size={size}>Sure?</Button> : <Button onClick={confirmDelete} size={size}>Delete</Button>
+  return confirm ? <Button onClick={deletePlayerCommand} className="btn-danger" style={buttonStyle} size={size}>Sure?</Button> : <Button onClick={confirmDelete} style={buttonStyle} size={size}>Delete</Button>
 }
 
 export default PlayerDeleter

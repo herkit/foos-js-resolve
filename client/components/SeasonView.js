@@ -13,7 +13,7 @@ const RecordCard = ({record}) => (
       <h3 className='card-title h6'>{record.title}</h3>
       <div className='row'>
         <div className='display-4 col-9'><PlayerName playerid={record.id}></PlayerName></div>
-        <div className='display-4 col-3'>{record.record}</div>
+        <div className='display-4 col-3 text-right'>{record.record}</div>
       </div>
     </div>
   </div>
@@ -21,8 +21,8 @@ const RecordCard = ({record}) => (
 
 const SeasonView = ({ id }) => {
   const [players, setPlayers] = useState()
-  const [winStreak, setWinStreak] = useState({ id: 0, winStreak: 0 })
-  const [lossStreak, setLossStreak] = useState({ id: 0, lossStreak: 0 })
+  const [winStreak, setWinStreak] = useState()
+  const [lossStreak, setLossStreak] = useState()
 
   const setPlayers1 = (data) => {   
     var ranks = Object.keys(data.players).reduce((prev, current) => ([...prev, data.players[current]]), [])
@@ -46,7 +46,7 @@ const SeasonView = ({ id }) => {
   }, [])
 
   return (<div>
-    <div className='row'>
+    <div className='d-flex justify-content-between'>
     {(() => { if (winStreak) { return <RecordCard record={winStreak} />}})()}
     {(() => { if (lossStreak) { return <RecordCard record={lossStreak} />}})()}
     </div>
