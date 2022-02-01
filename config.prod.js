@@ -14,23 +14,15 @@ const prodConfig = {
   distDir: 'dist',
   readModelConnectors: {
     default: {
-      module: '@resolve-js/readmodel-lite',
+      module: '@resolve-js/readmodel-mysql',
       options: {
-        databaseFile: 'data/read-models.db',
-      },
-    },
-    /*
-          default: {
-            module: '@resolve-js/readmodel-mysql',
-            options: {
-              host: 'localhost',
-              port: 3306,
-              user: 'customUser',
-              password: 'customPassword',
-              database: 'customDatabaseName'
-            }
-          }
-        */
+        host: declareRuntimeEnv('DB_MYSQL_HOST', 'localhost'),
+        port: 3306,
+        user: declareRuntimeEnv('DB_MYSQL_USER', 'customUser'),
+        password: 'customPassword',
+        database: 'customDatabaseName'
+      }
+    }
   },
   eventstoreAdapter: {
     module: '@resolve-js/eventstore-lite',

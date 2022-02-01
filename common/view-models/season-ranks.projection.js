@@ -69,8 +69,6 @@ export default {
       }
     }
 
-    console.log(stateChanges)
-
     return ({
       ...state,
       ...stateChanges

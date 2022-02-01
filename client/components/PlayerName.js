@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 const PlayerName = ({playerid}) => {
   const [playerName, setPlayerName] = useState("Unknown player")
 
+  console.log("playerid", playerid)
   const { connect, dispose } = useViewModel(
     'PlayerName', // The View Model's name.
     [playerid], // The aggregate ID for which to query data.
