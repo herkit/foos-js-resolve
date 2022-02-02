@@ -1,0 +1,30 @@
+version: "3.9"  # optional since v1.27.0
+
+services:
+  foosjs:
+    build: .
+    image: foosjs
+    ports:
+      - "8081:3000"
+    environment:
+      - DEBUG=resolve:* DEBUG_LEVEL=verbose yarn dev
+      - JWT_SECRET=mysupersecretjwtsecret
+      - MYSQL_HOST=db
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=mysecretpassword
+      - EVENTSTORE_MYSQL_HOST=db
+      - EVENTSTORE_MYSQL_USER=root
+      - EVENTSTORE_MYSQL_PASSWORD=mysecretpassword
+  db:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: mysecretpassword
+    ports:
+      - 3306:3306
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080

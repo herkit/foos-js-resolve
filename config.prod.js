@@ -16,22 +16,24 @@ const prodConfig = {
     default: {
       module: '@resolve-js/readmodel-mysql',
       options: {
-        host: declareRuntimeEnv('DB_MYSQL_HOST', 'localhost'),
-        port: 3306,
-        user: declareRuntimeEnv('DB_MYSQL_USER', 'customUser'),
-        password: 'customPassword',
-        database: 'customDatabaseName'
+        host: declareRuntimeEnv('MYSQL_HOST', 'localhost'),
+        port: declareRuntimeEnv('MYSQL_PORT', '3306'),
+        user: declareRuntimeEnv('MYSQL_USER', 'customUser'),
+        password: declareRuntimeEnv('MYSQL_PASSWORD', 'customPassword'),
+        database: declareRuntimeEnv('MYSQL_DBNAME', 'readmodels')
       }
     }
   },
   eventstoreAdapter: {
-    module: '@resolve-js/eventstore-lite',
+    module: '@resolve-js/eventstore-mysql',
     options: {
-      databaseFile: 'data/event-store.db',
-      secretsFile: 'data/secrets.db',
-      snapshotBucketSize: 100,
-    },
-  },
+      host: declareRuntimeEnv('EVENTSTORE_MYSQL_HOST', 'localhost'),
+      port: declareRuntimeEnv('EVENTSTORE_MYSQL_PORT', '3306'),
+      user: declareRuntimeEnv('EVENTSTORE_MYSQL_USER', 'customUser'),
+      password: declareRuntimeEnv('EVENTSTORE_MYSQL_PASSWORD', 'customPassword'),
+      database: declareRuntimeEnv('EVENTSTORE_MYSQL_DBNAME', 'events')
+    }
+},
   /*
       {
         module: '@resolve-js/eventstore-mysql',
