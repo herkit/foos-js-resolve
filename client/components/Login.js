@@ -29,7 +29,7 @@ const Login = (props) => {
         <div case="signup">
           <AuthForm
             buttonText="Create account"
-            action="/api/register"
+            action={`/api/register${location.search}`}
             title="Create account"
           />
           <div className='mt-3'>

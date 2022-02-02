@@ -1,6 +1,6 @@
 import React from 'react'
 import { Modal } from 'react-bootstrap'
-import { Route, Routes } from 'react-router'
+import { Navigate, Route, Routes } from 'react-router'
 import { LeagueCreate } from './components/LeagueCreate'
 import { LeagueSelect } from './components/LeagueSelect'
 import { LeagueView } from './components/LeagueView'
@@ -19,6 +19,7 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<SigninContainer />}>
+        <Route path="" element={<Navigate to="/login" />} />
         <Route path="login" element={<Login />} />
       </Route>
       <Route path="/" element={<App />}>
