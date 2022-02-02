@@ -5,9 +5,9 @@ services:
     build: .
     image: foosjs
     ports:
-      - "8081:3000"
+      - "8081:8081"
     environment:
-      - DEBUG=resolve:* DEBUG_LEVEL=verbose yarn dev
+      - DEBUG=* DEBUG_LEVEL=verbose yarn dev
       - JWT_SECRET=mysupersecretjwtsecret
       - MYSQL_HOST=db
       - MYSQL_USER=root
@@ -15,6 +15,8 @@ services:
       - EVENTSTORE_MYSQL_HOST=db
       - EVENTSTORE_MYSQL_USER=root
       - EVENTSTORE_MYSQL_PASSWORD=mysecretpassword
+      - HOST=0.0.0.0
+      - PORT=8081
   db:
     image: mysql
     command: --default-authentication-plugin=mysql_native_password
@@ -22,6 +24,14 @@ services:
       MYSQL_ROOT_PASSWORD: mysecretpassword
     ports:
       - 3306:3306
+
+  dbinit:
+    image: mysql
+    command: ["mysql", "-h", "db", "-u", "root", '-pmysecretpassword', "--execute=CREATE DATABASE IF NOT EXISTS events COLLATE latin1_danish_ci; CREATE DATABASE IF NOT EXISTS readmodels COLLATE latin1_danish_ci;"]
+    environment:
+      MYSQL_ROOT_PASSWORD: mysecretpassword    
+    depends_on: 
+      - db
 
   adminer:
     image: adminer
