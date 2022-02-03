@@ -14,7 +14,7 @@ const routeRegisterCallback = async ({ resolve }, username, password) => {
   const user = {
     email: username.trim(),
     name: username.trim(),
-    password: hashPassword(password),
+    password: password,
     id: uuid(),
   }
   await resolve.executeCommand({

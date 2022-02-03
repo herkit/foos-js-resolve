@@ -8,13 +8,14 @@ const PlayerCreate = ({ onCreateSuccess }) => {
   const [name, nameInput] = useInput({ type: "text", className: "form-control" })
   const [email, emailInput] = useInput({ type: "email", className: "form-control" })
   const [avatar, avatarInput] = useInput({ type: "text", className: "form-control" })  
+  const [password, passwordInput] = useInput({ type: "password", className: "form-control" })  
 
   const createPlayer = useCommand(
     {
       type: 'createPlayer',
       aggregateId: uuid(),
       aggregateName: 'Player',
-      payload: { name: name, email: email, avatar: avatar },
+      payload: { name, email, avatar, password },
     },
     (err, result) => {
       console.log(err, result)
@@ -31,6 +32,10 @@ const PlayerCreate = ({ onCreateSuccess }) => {
     <div className="form-group">
       <label>Email</label>
       {emailInput}
+    </div>
+    <div className="form-group">
+      <label>Password</label>
+      {passwordInput}
     </div>
     <div className="form-group">
       <label>Avatar</label>

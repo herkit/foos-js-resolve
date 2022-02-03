@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import { useQuery, useViewModel } from '@resolve-js/react-hooks'
+//import { useQuery, useViewModel } from '@resolve-js/react-hooks'
 import { MatchRegistration } from "./MatchRegistration"
 import { PlayerName } from './PlayerName'
+import { useSelector } from 'react-redux'
+import { useReduxViewModel } from '@resolve-js/redux'
+import { Helmet } from 'react-helmet'
 
 const byRankDesc = (a,b) => (b.rank - a.rank)
 const byWinStreak = (a,b) => (b.longestWinStreak - a.longestWinStreak)
@@ -20,11 +23,10 @@ const RecordCard = ({record}) => (
 )
 
 const SeasonView = ({ id }) => {
-  const [players, setPlayers] = useState()
   const [winStreak, setWinStreak] = useState()
   const [lossStreak, setLossStreak] = useState()
 
-  const setPlayers1 = (data) => {   
+  /*const setPlayers1 = (data) => {   
     var ranks = Object.keys(data.players).reduce((prev, current) => ([...prev, data.players[current]]), [])
     var longestWinStreak = ranks.sort(byWinStreak)[0];
     var longestLossStreak = ranks.sort(byLossStreak)[0];
@@ -34,9 +36,15 @@ const SeasonView = ({ id }) => {
     if (longestLossStreak)
       setLossStreak({ title: "Longest loss streak", id: longestLossStreak.id, record: longestLossStreak.longestLossStreak })
     setPlayers(ranks.sort(byRankDesc))
-  }
+  }*/
 
-  const {connect, dispose} = useViewModel("SeasonRanks", [id], setPlayers1);
+  const {connect, dispose, selector: playersSelector} = useReduxViewModel({
+    name: "SeasonRanks", 
+    aggregateIds: [id],
+  })
+  const { data: players, playersStatus } = useSelector(playersSelector)
+
+  console.log(players)
 
   useEffect(() => {
     connect()
@@ -47,24 +55,24 @@ const SeasonView = ({ id }) => {
 
   return (<div>
     <div className='d-flex justify-content-between'>
-    {(() => { if (winStreak) { return <RecordCard record={winStreak} />}})()}
-    {(() => { if (lossStreak) { return <RecordCard record={lossStreak} />}})()}
+    {(() => { if (players?.records?.winStreak) { return <RecordCard record={players.records.winStreak} />}})()}
+    {(() => { if (players?.records?.lossStreak) { return <RecordCard record={players.records.lossStreak} />}})()}
     </div>
     <div>
-      <table className="table">
+      <table className="table scoreboard">
         <thead>
           <tr>
             <th>Player</th>
-            <th>Played</th>
-            <th>Rank</th>
+            <th className='text-center'>Played</th>
+            <th className='text-right'>Rank</th>
           </tr>
         </thead>
         <tbody>
-          {players?.map((player) => (
+          {players?.ranks?.map((player) => (
           <tr key={player.id}>
             <td><PlayerName playerid={player.id}></PlayerName></td>
-            <td>{player.played}</td>
-            <td>{player.rank}</td>
+            <td className='text-center'>{player.played}</td>
+            <td className='text-right'>{player.rank}</td>
           </tr>))}
         </tbody>
       </table>

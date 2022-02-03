@@ -1,4 +1,5 @@
 import { SEASON_MATCH_REGISTERED } from "../event-types";
+import _ from "lodash"
 
 const defaultRank = { 
   rank: 1500, 
@@ -11,12 +12,24 @@ const defaultRank = {
   played: 0 
 }
 
+var upsert = function (arr, key, newval) {
+  var match = _.find(arr, key);
+  if(match){
+      var index = _.indexOf(arr, match);
+      arr.splice(index, 1, newval);
+  } else {
+      arr.push(newval);
+  }
+};
+
 export default {
-  Init: () => ( {players: {}, rankhistory: {} }),
+  Init: () => ( { ranks: [], rankhistory: {} }),
   [SEASON_MATCH_REGISTERED]: (state, { timestamp, payload: { winners, losers } }) => {
-    const winnerranks = winners.map(player => state.players[player] ?? { id: player, ...defaultRank });
-    const loserranks = losers.map(player => state.players[player] ?? { id: player, ...defaultRank });
-    
+    const ranks = [...state.ranks]
+
+    const winnerranks = winners.map(player => ranks.find(({id}) => id == player) ?? { id: player, ...defaultRank });
+    const loserranks = losers.map(player => ranks.find(({id}) => id == player) ?? { id: player, ...defaultRank });
+
     const totalwinner = winnerranks.reduce((prev, current) => (prev + current.rank), 0);
     const totalloser = loserranks.reduce((prev, current) => (prev + current.rank), 0);
 
@@ -35,56 +48,46 @@ export default {
     const scorePerWinner = scoreChange / winners.length;
     const scorePerLoser = scoreChange / losers.length;
 
-    const newRanks = [
-      ...winnerranks.map((p) => ({
-        ...p, 
-        rank: p.rank + scorePerWinner, 
-        played: p.played + 1,
-        winCount: p.winCount + 1,
-        winStreak: p.winStreak + 1,
-        longestWinStreak: Math.max(p.winStreak + 1, p.winStreak),
-        lossStreak: 0
-      })),
-      ...loserranks.map((p) => ({
-        ...p,
-        rank: p.rank - scorePerLoser, 
-        played: p.played + 1,
-        winStreak: 0, 
-        lossCount: p.lossCount + 1,
-        lossStreak: p.lossStreak + 1,
-        longestLossStreak: Math.max(p.lossStreak + 1, p.longestLossStreak, 0),
-      }))
-    ]
+    const rankUpdates = [...winnerranks.map((p) => ({
+      ...p, 
+      rank: p.rank + scorePerWinner, 
+      played: p.played + 1,
+      winCount: p.winCount + 1,
+      winStreak: p.winStreak + 1,
+      longestWinStreak: Math.max(p.winStreak + 1, p.winStreak),
+      lossStreak: 0
+    })),
+    ...loserranks.map((p) => ({
+      ...p,
+      rank: p.rank - scorePerLoser, 
+      played: p.played + 1,
+      winStreak: 0, 
+      lossCount: p.lossCount + 1,
+      lossStreak: p.lossStreak + 1,
+      longestLossStreak: Math.max(p.lossStreak + 1, p.longestLossStreak, 0),
+    }))]
+   
+    rankUpdates.forEach(p => upsert(ranks, { id: p.id }, p) )
+
+    const lls = ranks.sort((a, b) => b.longestLossStreak - a.longestLossStreak)[0];
+    const lws = ranks.sort((a, b) => b.longestWinStreak - a.longestWinStreak)[0];
 
     const stateChanges = {
       ...state,
-      players: {
-        ...state.players,
-        ...newRanks.reduce((playersState, { id, rank, played, winCount, winStreak, longestWinStreak, lossCount, lossStreak, longestLossStreak}) => (
-          {
-            ...playersState,
-            [id]: { 
-              id,
-              rank, 
-              played,
-              winCount,
-              winStreak, 
-              longestWinStreak,
-              lossCount,
-              lossStreak,
-              longestLossStreak
-            }
-          }), {})
-      },
+      ranks: ranks.sort((a, b) => b.rank - a.rank),
       rankhistory: {
         ...state.rankhistory,
-        ...newRanks.reduce((playersState, { id, rank }) => ({
+        ...ranks.reduce((playersState, { id, rank }) => ({
           ...playersState,
           [id]: [
             ...state.rankhistory[id] ?? [],
             { timestamp, rank }
           ]
         }), {})
+      },
+      records: {
+        winStreak: { title: "Longest Win Streak", id: lws.id, record: lws.longestWinStreak },
+        lossStreak: { title: "Longest Loss Streak", id: lls.id, record: lls.longestLossStreak },
       }
     }
 

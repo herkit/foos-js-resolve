@@ -12,6 +12,11 @@ const App = () => {
     type: 'text/css',
     href: staticResolver('/style.css'),
   }
+  const scoreboardLink = {
+    rel: 'stylesheet',
+    type: 'text/css',
+    href: staticResolver('/scoreboard.css'),
+  }  
   const stylesheetLink = {
     rel: 'stylesheet',
     type: 'text/css',
@@ -22,7 +27,7 @@ const App = () => {
     type: 'image/png',
     href: staticResolver('/favicon.png'),
   }
-  const links = [bootstrapLink, stylesheetLink, faviconLink]
+  const links = [bootstrapLink, stylesheetLink, scoreboardLink, faviconLink]
   const meta = {
     name: 'viewport',
     content: 'width=device-width, initial-scale=1',

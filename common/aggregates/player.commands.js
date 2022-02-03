@@ -1,3 +1,4 @@
+import hashPassword from "../../auth/passwordhash";
 import { PLAYER_CREATED, PLAYER_DELETED, PLAYER_WON_MATCH, PLAYER_LOST_MATCH } from "../event-types";
 export default {
     createPlayer: (state, {payload: {username, name, email, password, avatar}}) => {
@@ -9,7 +10,7 @@ export default {
         throw new Error("email is invalid");
       return {
         type: PLAYER_CREATED,
-        payload: {username, name, email, password, avatar}
+        payload: {username, name, email, password: hashPassword(password), avatar}
       }
     },
     deletePlayer: (state) =>

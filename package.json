@@ -27,6 +27,7 @@
     "@resolve-js/readmodel-lite": "0.33.14",
     "@resolve-js/readmodel-mysql": "0.33.14",
     "@resolve-js/readmodel-postgresql": "0.33.14",
+    "@resolve-js/redux": "0.33.14",
     "@resolve-js/runtime-aws-serverless": "0.33.14",
     "@resolve-js/runtime-single-process": "0.33.14",
     "jsonwebtoken": "8.5.1",
@@ -37,9 +38,13 @@
     "react-bootstrap-typeahead": "^6.0.0-alpha.6",
     "react-dom": "17.0.2",
     "react-helmet": "6.1.0",
+    "react-redux": "7.2.6",
     "react-router": "^6.2.1",
     "react-router-config": "^5.1.1",
     "react-router-dom": "^6.2.1",
+    "redux": "^4.1.2",
+    "redux-devtools-extension": "^2.13.9",
+    "redux-saga": "^1.1.3",
     "uuid": "8.3.2"
   },
   "devDependencies": {
