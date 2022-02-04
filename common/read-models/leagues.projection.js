@@ -1,19 +1,42 @@
-import { LEAGUE_CREATED, PLAYER_CREATED, PLAYER_DELETED, PLAYER_LOST_MATCH, PLAYER_WON_MATCH, SEASON_STARTED } from '../event-types'
+import { LEAGUE_CREATED } from '../event-types'
+import slugify from 'slugify'
+
+const slugExists = async (store, slug) => {
+  const league = await store.findOne('Leagues', { slug });
+  if (league)
+    return true
+  return false
+}
+
 const readModel = {
   Init: async (store) => {
     await store.defineTable('Leagues', {
       indexes: {
         id: 'string'
       },
-      fields: ['name']
+      fields: ['name', 'slug']
     })
   },
   [LEAGUE_CREATED]: async (store, { aggregateId, payload: { name } }) => 
   {
+    const slugBase = slugify(name).toLowerCase()
+    var slug = slugBase
+
+    var exists = await slugExists(store, slug)
+   
+    var postfix = 0
+    while (exists) {
+      postfix = (postfix ?? 0) + 1
+      slug = slugBase + "-" + postfix
+      exists = await slugExists(store, slug)
+    }
+
+    //console.log("slug", slug)
+
     await store.update(
       'Leagues',
       { id: aggregateId },
-      { $set: { name } },
+      { $set: { name, slug } },
       { upsert: true }
     )
   }/*,

@@ -1,12 +1,12 @@
 import _, { isArray } from "lodash";
 import { SEASON_CREATED, SEASON_MATCH_REGISTERED } from "../event-types";
 export default {
-    createSeason: (state, { payload: { leagueid } }) => {
+    createSeason: (state, { payload: { leagueid, rating } }) => {
       if (state.createdAt)
         throw new Error("Season has already been created")
       return {
         type: SEASON_CREATED,
-        payload: { leagueid: leagueid }
+        payload: { leagueid: leagueid, rating: rating ?? "basic" }
       }
     },
     registerMatch: (state, { payload: { matchid, winners, losers }}) => {

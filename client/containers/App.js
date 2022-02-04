@@ -20,7 +20,7 @@ const App = () => {
   const stylesheetLink = {
     rel: 'stylesheet',
     type: 'text/css',
-    href: staticResolver('/bootstrap.min.css'),
+    href: staticResolver('/bootstrap.css'),
   }
   const faviconLink = {
     rel: 'icon',

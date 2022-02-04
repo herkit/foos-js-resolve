@@ -3,9 +3,7 @@ import { useViewModel } from '@resolve-js/react-hooks'
 import { SeasonView } from './SeasonView'
 import { useParams } from 'react-router';
 
-const LeagueView = () => {
-  let params = useParams();
-  const id = params?.id;
+const LeagueView = ({id}) => {
   if (!id) throw new Error("league id must be set")
 
   const [league, setLeague] = useState()
@@ -25,7 +23,6 @@ const LeagueView = () => {
 
   if (league?.currentSeason)
   {
-    console.log("League", league)
     return (
       <div>
         <h2>{league.name}</h2>

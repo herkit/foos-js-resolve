@@ -18,7 +18,7 @@ const LeagueSelect = ({ onLeagueSelected }) => {
   return (<div>
     <h2>Leagues</h2>
     <div className="list-group">
-    {leagues.map(({id, name}) => (<Link to={`/leagues/${id}`} className="list-group-item list-group-item-action" key={name}>{name}</Link>))}
+    {leagues.map(({id, name, slug}) => (<Link to={`/leagues/${slug}`} className="list-group-item list-group-item-action" key={id}>{name}</Link>))}
     </div>
     <LeagueCreate></LeagueCreate>
   </div>

@@ -1,5 +1,6 @@
-import { SEASON_MATCH_REGISTERED } from "../event-types";
+import { SEASON_CREATED, SEASON_MATCH_REGISTERED } from "../event-types";
 import _ from "lodash"
+import EloRating, { calculate } from "elo-rating"
 
 const defaultRank = { 
   rank: 1500, 
@@ -22,8 +23,34 @@ var upsert = function (arr, key, newval) {
   }
 };
 
+const calculateElo = ({ avgwinner, avgloser }) => {
+  let eloRatings = EloRating.calculate(avgwinner, avgloser);
+  console.log("eloRatings:", eloRatings)
+  return eloRatings.playerRating - avgwinner;
+}
+
+const calculateBasic = ({ totalwinner, totalloser }) => {
+  let scoreChange = 10;
+  if (totalwinner > totalloser) {
+    scoreChange = 5;
+    if (totalwinner >= totalloser + 100)
+      scoreChange = 0;
+  } else {
+    if (totalwinner < totalloser - 100)
+    {
+      scoreChange = 20;
+    } 
+  }
+  return scoreChange
+}
+
+
 export default {
-  Init: () => ( { ranks: [], rankhistory: {} }),
+  Init: () => ( { ranks: [], rankhistory: {}, rating: "basic" }),
+  [SEASON_CREATED]: (state, { payload: { rating } }) => ({
+    ...state,
+    rating: rating ?? state.rating
+  }),
   [SEASON_MATCH_REGISTERED]: (state, { timestamp, payload: { winners, losers } }) => {
     const ranks = [...state.ranks]
 
@@ -33,17 +60,28 @@ export default {
     const totalwinner = winnerranks.reduce((prev, current) => (prev + current.rank), 0);
     const totalloser = loserranks.reduce((prev, current) => (prev + current.rank), 0);
 
-    let scoreChange = 10;
-    if (totalwinner > totalloser) {
-      scoreChange = 5;
-      if (totalwinner >= totalloser + 100)
-        scoreChange = 0;
-    } else {
-      if (totalwinner < totalloser - 100)
-      {
-        scoreChange = 20;
-      } 
+    console.log(totalwinner, winnerranks.length, totalloser)
+
+    const avgwinner = totalwinner / winnerranks.length;
+    const avgloser = totalloser / loserranks.length;
+
+    const playerdata = {
+      totalloser,
+      totalwinner,
+      avgwinner,
+      avgloser
     }
+
+    let scoreChange = 0
+    console.log(state.rating)
+    switch(state.rating ?? "basic") {
+      case "elo": 
+        scoreChange = calculateElo(playerdata)
+        break
+      default:
+        scoreChange = calculateBasic(playerdata)
+    }
+    console.log("change", scoreChange)
 
     const scorePerWinner = scoreChange / winners.length;
     const scorePerLoser = scoreChange / losers.length;

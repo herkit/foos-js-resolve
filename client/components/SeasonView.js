@@ -5,6 +5,7 @@ import { PlayerName } from './PlayerName'
 import { useSelector } from 'react-redux'
 import { useReduxViewModel } from '@resolve-js/redux'
 import { Helmet } from 'react-helmet'
+import { Modal } from 'react-bootstrap'
 
 const byRankDesc = (a,b) => (b.rank - a.rank)
 const byWinStreak = (a,b) => (b.longestWinStreak - a.longestWinStreak)
@@ -23,20 +24,7 @@ const RecordCard = ({record}) => (
 )
 
 const SeasonView = ({ id }) => {
-  const [winStreak, setWinStreak] = useState()
-  const [lossStreak, setLossStreak] = useState()
-
-  /*const setPlayers1 = (data) => {   
-    var ranks = Object.keys(data.players).reduce((prev, current) => ([...prev, data.players[current]]), [])
-    var longestWinStreak = ranks.sort(byWinStreak)[0];
-    var longestLossStreak = ranks.sort(byLossStreak)[0];
-    console.log(longestLossStreak, longestWinStreak)
-    if (longestWinStreak)
-      setWinStreak({ title: "Longest win streak", id: longestWinStreak.id, record: longestWinStreak.longestWinStreak })
-    if (longestLossStreak)
-      setLossStreak({ title: "Longest loss streak", id: longestLossStreak.id, record: longestLossStreak.longestLossStreak })
-    setPlayers(ranks.sort(byRankDesc))
-  }*/
+  const [showCreateMatch, setShowCreateMatch] = useState(false)
 
   const {connect, dispose, selector: playersSelector} = useReduxViewModel({
     name: "SeasonRanks", 
@@ -77,8 +65,15 @@ const SeasonView = ({ id }) => {
         </tbody>
       </table>
     </div>
-    <MatchRegistration season={id}>
-    </MatchRegistration>
+    <button class="btn btn-primary" onClick={() => setShowCreateMatch(true)}>New Match</button>
+    <Modal show={showCreateMatch}>
+      <Modal.Header>
+        <h2>New Match</h2>
+      </Modal.Header>
+      <Modal.Body>
+        <MatchRegistration season={id} onCancel={() => setShowCreateMatch(false)}></MatchRegistration>
+      </Modal.Body>
+    </Modal>
   </div>)
 }
 

@@ -1,6 +1,7 @@
 import React from 'react'
 import { Modal } from 'react-bootstrap'
 import { Navigate, Route, Routes } from 'react-router'
+import { LeagueBySlug } from './components/LeagueBySlug'
 import { LeagueCreate } from './components/LeagueCreate'
 import { LeagueSelect } from './components/LeagueSelect'
 import { LeagueView } from './components/LeagueView'
@@ -26,7 +27,7 @@ const AppRoutes = () => {
         <Route path="error" element={<Error />} />
         <Route path="leagues" element={<LeagueSelect />} />
         <Route path="leagues/create" element={<LeagueCreate />} />
-        <Route path="leagues/:id" element={<LeagueView />} />
+        <Route path="leagues/:slug" element={<LeagueBySlug />} />
         <Route path="players" element={<PlayerList />}>
           <Route path="create" element={
             <Modal backdrop="static" show="true">

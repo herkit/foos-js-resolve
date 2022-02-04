@@ -4,7 +4,7 @@ import { v4 as uuid } from 'uuid'
 import { useCommand } from '@resolve-js/react-hooks'
 import { Button, Form } from "react-bootstrap";
 
-const DoubleMatchCreate = ({ season, onDone }) => {
+const DoubleMatchCreate = ({ season, onDone, onCancel }) => {
   const [winner1, setWinner1] = useState()
   const [winner2, setWinner2] = useState()
   const [loser1, setLoser1] = useState()
@@ -25,11 +25,14 @@ const DoubleMatchCreate = ({ season, onDone }) => {
   )
 
   const cancelMatch = () => {
-    if (onDone && typeof(onDone) === "function")
+    if (onCancel && typeof(onCancel) === "function") 
+      onCancel()
+    else if (onDone && typeof(onDone) === "function")
       onDone()
   }
 
   return (<Form>
+    <h3>Double</h3>
     <Form.Group controlId="formWinner">
       <Form.Label>Winners</Form.Label>
       <PlayerSelect onSelected={(p) => setWinner1(p)}></PlayerSelect>
@@ -40,7 +43,7 @@ const DoubleMatchCreate = ({ season, onDone }) => {
       <PlayerSelect onSelected={(p) => setLoser1(p)}></PlayerSelect>
       <PlayerSelect onSelected={(p) => setLoser2(p)}></PlayerSelect>
     </Form.Group>
-    <Form.Group>
+    <Form.Group className="mt-4">
       <Button onClick={registerMatch}>Add</Button>
       <Button onClick={cancelMatch}>Cancel</Button>
     </Form.Group>

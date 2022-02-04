@@ -1,11 +1,11 @@
 import { LEAGUE_CREATED, SEASON_STARTED } from "../event-types";
 export default {
-    createLeague: (state, {payload: {name}}) => {
+    createLeague: (state, {payload: {name, rating}}) => {
       if (state.createdAt) throw new Error("The league already exists")
       if (!name) throw new Error("name is required")
       return {
         type: LEAGUE_CREATED,
-        payload: { name }
+        payload: { name, rating: rating ?? "elo" }
       }
     },
     startSeason: (state, { aggregateId, payload: { seasonid } }) => {

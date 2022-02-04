@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import { useQuery, useCommand } from '@resolve-js/react-hooks'
 import PlayerDeleter from './PlayerDeleter'
 import PlayerCreate from './PlayerCreate'
-import { ThemeConsumer } from 'react-bootstrap/esm/ThemeProvider'
 import { Outlet } from 'react-router'
 const PlayerList = () => {
   const [players, setPlayers] = useState([])
