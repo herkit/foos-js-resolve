@@ -73,7 +73,6 @@ export default {
     }
 
     let scoreChange = 0
-    console.log(state.rating)
     switch(state.rating ?? "basic") {
       case "elo": 
         scoreChange = calculateElo(playerdata)
@@ -81,7 +80,6 @@ export default {
       default:
         scoreChange = calculateBasic(playerdata)
     }
-    console.log("change", scoreChange)
 
     const scorePerWinner = scoreChange / winners.length;
     const scorePerLoser = scoreChange / losers.length;

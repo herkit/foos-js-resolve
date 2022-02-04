@@ -29,8 +29,8 @@ const LeagueCreate = ({ onCreateSuccess }) => {
     </div>
     <div className="form-group">
       <label>Rating system</label>
-      <select className="form-control" onChange={(e) => setRating(e.target.value)}>
-        <option value="elo" selected>Elo rating</option>
+      <select className="form-control" value={rating} onChange={(e) => setRating(e.target.value)}>
+        <option value="elo">Elo rating</option>
         <option value="basic">Basic rating</option>
       </select>
     </div>

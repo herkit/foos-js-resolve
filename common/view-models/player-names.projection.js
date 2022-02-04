@@ -1,10 +1,17 @@
 import { PLAYER_CREATED, PLAYER_DELETED } from "../event-types";
 export default {
-  Init: () => {},
+  Init: () => ({ name: "Unknown Player", deleted: false }),
   [PLAYER_CREATED]: (state, { aggregateId, payload: { name } }) => (
-    name
+    {
+      ...state,
+      name
+    }
   ),
   [PLAYER_DELETED]: (state, { aggregateId }) => (
-    'Removed player'
+    {
+      ...state,
+      name: 'Removed player',
+      deleted: true
+    }
   )
 };

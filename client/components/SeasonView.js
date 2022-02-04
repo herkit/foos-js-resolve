@@ -65,13 +65,13 @@ const SeasonView = ({ id }) => {
         </tbody>
       </table>
     </div>
-    <button class="btn btn-primary" onClick={() => setShowCreateMatch(true)}>New Match</button>
+    <button className="btn btn-primary" onClick={() => setShowCreateMatch(true)}>New Match</button>
     <Modal show={showCreateMatch}>
       <Modal.Header>
         <h2>New Match</h2>
       </Modal.Header>
       <Modal.Body>
-        <MatchRegistration season={id} onCancel={() => setShowCreateMatch(false)}></MatchRegistration>
+        <MatchRegistration season={id} onCancel={() => setShowCreateMatch(false)} onCreated={() => setShowCreateMatch(false)}></MatchRegistration>
       </Modal.Body>
     </Modal>
   </div>)

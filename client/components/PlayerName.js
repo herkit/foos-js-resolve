@@ -2,11 +2,11 @@ import { useViewModel } from '@resolve-js/react-hooks'
 import React, { useState, useEffect } from 'react'
 
 const PlayerName = ({playerid}) => {
-  const [playerName, setPlayerName] = useState("Unknown player")
+  const [player, setPlayer] = useState("Unknown player")
   const { connect, dispose } = useViewModel(
     'PlayerName', // The View Model's name.
     [playerid], // The aggregate ID for which to query data.
-    setPlayerName // A callback to call when new data is recieved.
+    setPlayer // A callback to call when new data is recieved.
   )
 
   useEffect(() => {
@@ -16,11 +16,10 @@ const PlayerName = ({playerid}) => {
     }
   }, [playerid])
 
-  return (
-    <span>
-    {playerName}
-    </span>
-  )
+  if (player.deleted)
+    return (<span style={{opacity: "0.5"}}>{player.name}</span>)
+  else
+    return (<span>{player.name}</span>)
 }
 
 export { PlayerName }
