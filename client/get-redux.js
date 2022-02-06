@@ -1,10 +1,9 @@
 import { devTools } from './enhancers/redux-devtools'
 
-const getRedux = (
-) => {
+const getRedux = ({}, history) => {
   return {
     reducers: {
-      jwt: (jwt = {}) => jwt,
+      jwt: (jwt = { test: "data" }) => jwt,
     },
     enhancers: [devTools],
   }

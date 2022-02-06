@@ -25,7 +25,6 @@ var upsert = function (arr, key, newval) {
 
 const calculateElo = ({ avgwinner, avgloser }) => {
   let eloRatings = EloRating.calculate(avgwinner, avgloser);
-  console.log("eloRatings:", eloRatings)
   return eloRatings.playerRating - avgwinner;
 }
 
@@ -59,8 +58,6 @@ export default {
 
     const totalwinner = winnerranks.reduce((prev, current) => (prev + current.rank), 0);
     const totalloser = loserranks.reduce((prev, current) => (prev + current.rank), 0);
-
-    console.log(totalwinner, winnerranks.length, totalloser)
 
     const avgwinner = totalwinner / winnerranks.length;
     const avgloser = totalloser / loserranks.length;

@@ -5,15 +5,21 @@ const readModel = {
       indexes: {
         id: 'string'
       },
-      fields: ['name', 'email', 'password', 'avatar', 'currentRank'],
+      fields: ['name', 'email', 'password', 'avatar', 'currentRank', 'isSuperuser'],
     })
   },
   [PLAYER_CREATED]: async (store, { aggregateId, payload: { name, email, avatar, password } }) => 
   {
+    // the first registered user is always a superuser
+    console.log("check if a user exists")
+    
+    const userExist = await store.find('Players', {}, { id: 1 }, { name: 1 })
+    const isSuperuser = (Array.isArray(userExist) && userExist.length == 0)
+
     await store.update(
       'Players',
       { id: aggregateId },
-      { $set: { name, email, avatar, password } },
+      { $set: { name, email, avatar, password, isSuperuser } },
       { upsert: true }
     )
   },

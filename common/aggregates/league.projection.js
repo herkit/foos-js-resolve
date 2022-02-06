@@ -1,9 +1,10 @@
 import { LEAGUE_CREATED, SEASON_STARTED } from '../event-types';
 export default {
-  Init: () => ({}),
-  [LEAGUE_CREATED]: (state, {timestamp, payload: { rating }}) => ({
+  Init: () => ({ seasons:[], admins: []}),
+  [LEAGUE_CREATED]: (state, {timestamp, payload: { rating, owner }}) => ({
     ...state,
     seasons: [],
+    admins: [...state.admins, owner],
     rating,
     createdAt: timestamp
   }),

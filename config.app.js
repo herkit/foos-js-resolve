@@ -86,6 +86,22 @@ const appConfig = {
         target: 'web',
       },
     ],
+    [
+      'client/ssr.js',
+      {
+        outputFile: 'common/local-entry/ssr.js',
+        moduleType: 'commonjs',
+        target: 'node',
+      },
+    ],
+    [
+      'client/ssr.js',
+      {
+        outputFile: 'common/cloud-entry/ssr.js',
+        moduleType: 'commonjs',
+        target: 'node',
+      },
+    ],
   ],
 }
 export default appConfig

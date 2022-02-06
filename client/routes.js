@@ -20,7 +20,7 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<SigninContainer />}>
-        <Route path="" element={<Navigate to="/login" />} />
+        <Route path="" element={<LeagueSelect />} />
         <Route path="login" element={<Login />} />
       </Route>
       <Route path="/" element={<App />}>

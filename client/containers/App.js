@@ -4,6 +4,7 @@ import { Navbar, Image } from 'react-bootstrap'
 import { useStaticResolver } from '@resolve-js/react-hooks'
 import { Outlet } from 'react-router'
 import { Link } from 'react-router-dom'
+import LoggedInContent from '../components/LoggedInContent'
 
 const App = () => {
   const staticResolver = useStaticResolver()
@@ -44,7 +45,9 @@ const App = () => {
           <span>{'Foos'}</span>
         </Navbar.Brand>
         <Link to={`/leagues`} className="p-2">Leagues</Link>
-        <Link to={`/players`} className="p-2">Players</Link>
+        <LoggedInContent requireSuperuser={true} showLoginLink={false}>
+          <Link to={`/players`} className="p-2">Players</Link>
+        </LoggedInContent>
       </Navbar>
       <div className="container">
         <Outlet></Outlet>

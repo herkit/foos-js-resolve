@@ -6,6 +6,8 @@ import { useSelector } from 'react-redux'
 import { useReduxViewModel } from '@resolve-js/redux'
 import { Helmet } from 'react-helmet'
 import { Modal } from 'react-bootstrap'
+import { Navigate } from 'react-router'
+import LoggedInContent from './LoggedInContent'
 
 const byRankDesc = (a,b) => (b.rank - a.rank)
 const byWinStreak = (a,b) => (b.longestWinStreak - a.longestWinStreak)
@@ -65,15 +67,18 @@ const SeasonView = ({ id }) => {
         </tbody>
       </table>
     </div>
-    <button className="btn btn-primary" onClick={() => setShowCreateMatch(true)}>New Match</button>
-    <Modal show={showCreateMatch}>
-      <Modal.Header>
-        <h2>New Match</h2>
-      </Modal.Header>
-      <Modal.Body>
-        <MatchRegistration season={id} onCancel={() => setShowCreateMatch(false)} onCreated={() => setShowCreateMatch(false)}></MatchRegistration>
-      </Modal.Body>
-    </Modal>
+
+    <LoggedInContent>
+      <button className="btn btn-primary" onClick={() => setShowCreateMatch(true)}>New Match</button>
+      <Modal show={showCreateMatch} onHide={() => setShowCreateMatch(false)}>
+        <Modal.Header>
+          <h2>New Match</h2>
+        </Modal.Header>
+        <Modal.Body>
+          <MatchRegistration season={id} onCancel={() => setShowCreateMatch(false)} onCreated={() => setShowCreateMatch(false)}></MatchRegistration>
+        </Modal.Body>
+      </Modal>
+    </LoggedInContent>
   </div>)
 }
 

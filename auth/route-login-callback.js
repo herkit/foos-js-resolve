@@ -15,7 +15,7 @@ const routeLoginCallback = async ({ resolve }, username, password) => {
       if (!user) {
         throw new Error('Incorrect "username" or "password"')
       }
-      return jwt.sign({ name: user.name, email: user.email, sub: user.id }, jwtSecret)
+      return jwt.sign({ name: user.name, email: user.email, id: user.id, superuser: user.isSuperuser }, jwtSecret)
     } catch (error) {
       if (Date.now() - startTimestamp > API_GATEWAY_TIMEOUT) {
         throw error

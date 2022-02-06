@@ -1,11 +1,17 @@
+
+import jsonwebtoken from 'jsonwebtoken'
+import jwtSecret from '../../auth/jwt-secret'
+import validate from './validation'
 import { LEAGUE_CREATED, SEASON_STARTED } from "../event-types";
 export default {
-    createLeague: (state, {payload: {name, rating}}) => {
+    createLeague: (state, {payload: {name, rating}}, { jwt: token }) => {
+      const jwt = jsonwebtoken.verify(token, jwtSecret)
+      validate.fieldRequired(jwt, 'id')
       if (state.createdAt) throw new Error("The league already exists")
       if (!name) throw new Error("name is required")
       return {
         type: LEAGUE_CREATED,
-        payload: { name, rating: rating ?? "elo" }
+        payload: { name, rating: rating ?? "elo", owner: jwt.id }
       }
     },
     startSeason: (state, { aggregateId, payload: { seasonid } }) => {
