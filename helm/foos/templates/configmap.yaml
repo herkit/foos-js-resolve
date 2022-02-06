@@ -1,0 +1,11 @@
+{{- $fullName := include "foos.fullname" . -}}
+{{- if .Values.config -}}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ $fullName }}-configmap
+data:
+  {{- range $key, $val := .Values.config }}
+  {{ $key | upper }}: {{ $val | quote }}
+  {{- end }}
+{{- end -}}

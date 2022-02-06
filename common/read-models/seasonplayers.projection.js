@@ -31,6 +31,8 @@ const readModel = {
   Init: async (store) => {
     await store.defineTable('SeasonPlayers', {
       indexes: {
+        seasonid: 'string',
+        playerid: 'string'
       },
       fields: ['seasonid', 'playerid', 'rank', 'played', 'winCount', 'winStreak', 'lossCount', 'lossStreak', 'recentgames']
     })

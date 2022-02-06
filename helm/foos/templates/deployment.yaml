@@ -1,3 +1,4 @@
+{{- $fullName := include "foos.fullname" . -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -45,6 +46,17 @@ spec:
             httpGet:
               path: /
               port: http
+          {{- if or (.Values.config) (.Values.secrets) }}
+          envFrom:
+            {{- if .Values.config }}
+            - configMapRef:
+                name: {{$fullName}}-configmap
+            {{- end }}
+            {{- if .Values.secrets }}
+            - secretRef:
+                name: {{$fullName}}-secrets
+            {{- end }}
+          {{- end }}              
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

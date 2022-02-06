@@ -33,19 +33,13 @@ const appConfig = {
       projection: 'common/read-models/leagues.projection.js',
       resolvers: 'common/read-models/leagues.resolvers.js',
       connectorName: 'default'
-    },
+    }/*,
     {
       name: 'Seasons',
       projection: 'common/read-models/seasons.projection.js',
       resolvers: 'common/read-models/seasons.resolvers.js',
       connectorName: 'default'
-    },
-    {
-      name: 'SeasonPlayers',
-      projection: 'common/read-models/seasonplayers.projection.js',
-      resolvers: 'common/read-models/seasonplayers.resolvers.js',
-      connectorName: 'default'
-    }
+    }*/
   ],
   viewModels: [
     {
@@ -66,11 +60,6 @@ const appConfig = {
     }
   ],
   sagas: [
-    /*{
-      name: "PlayerRank",
-      source: 'common/sagas/playerrank.saga.js',
-      connectorName: 'default',
-    },*/
     { 
       name: 'LeagueCreation', 
       source: 'common/sagas/league-creation.saga.js',
