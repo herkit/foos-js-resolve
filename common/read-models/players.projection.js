@@ -3,6 +3,7 @@ const readModel = {
   Init: async (store) => {
     await store.defineTable('Players', {
       indexes: {
+        email: 'string',
         id: 'string'
       },
       fields: ['name', 'email', 'password', 'avatar', 'currentRank', 'isSuperuser'],

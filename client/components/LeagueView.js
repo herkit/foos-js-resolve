@@ -1,18 +1,79 @@
 import React, { useState, useEffect } from 'react'
-import { useViewModel } from '@resolve-js/react-hooks'
+import { useCommand, useViewModel } from '@resolve-js/react-hooks'
 import { SeasonView } from './SeasonView'
-import { useParams } from 'react-router';
+import { useSelector } from 'react-redux';
 
-const LeagueView = ({id}) => {
+const StarSvg = ({filled, onClick, size}) => {
+  const style = {
+    fill: filled ? "#b58900" : "none",
+    stroke: "#b58900",
+    strokeWidth: "1px",
+    strokeLinejoin: "round",
+    paintOrder: "markers fill stroke",
+    strokeMiterlimit: "4",
+    strokeDasharray: "none"
+  }
+  return (
+    <div onClick={onClick} title="Automatically browse to this league when logging in" style={{ cursor: "pointer" }}>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size ?? "24"}
+        height={size ?? "24"}
+        viewBox="0 0 12.7 12.7"
+        version="1.1"
+        id="star">
+        <g
+          id="starpath">
+          <path
+            style={style}
+            d="M 6.3500001,0.85989571 8.1190192,4.4443204 12.074667,5.0191098 9.2123333,7.8091951 9.8880384,11.748859 6.3499999,9.8888021 2.8119611,11.748859 3.4876665,7.8091951 0.62533314,5.0191094 4.5809806,4.4443204 Z"/>
+        </g>
+      </svg>
+    </div>
+  )
+}
+
+const LeagueView = ({id, slug}) => {
   if (!id) throw new Error("league id must be set")
 
   const [league, setLeague] = useState()
+  const [playerSettings, setPlayerSettings] = useState({ name: "", settings: {} })
+  const me = useSelector((state) => state.jwt)
+
+  const { connect: connectSettings, dispose: disposeSettings } = useViewModel(
+    'PlayerSettings',
+    [me.id],
+    setPlayerSettings
+  )
 
   const { connect, dispose } = useViewModel(
-    'LeagueData', // The View Model's name.
-    [id], // The aggregate ID for which to query data.
-    setLeague // A callback to call when new data is recieved.
+    'LeagueData',
+    [id],
+    setLeague
   )
+
+  const setDefaultLeague = useCommand({
+    type: 'setDefaultLeague',
+    aggregateId: me.id,
+    aggregateName: "Player",
+    payload: { id, slug }
+
+  }, (err, res) => {
+    if (err)
+      console.error(err)
+    else
+      console.log(res)
+  })
+  const resetDefaultLeague = useCommand({
+    type: 'resetDefaultLeague',
+    aggregateId: me.id,
+    aggregateName: "Player"
+  }, (err, res) => {
+    if (err)
+      console.error(err)
+    else
+      console.log(res)
+  })  
 
   useEffect(() => {
     connect()
@@ -21,13 +82,32 @@ const LeagueView = ({id}) => {
     }
   }, [])
 
+  useEffect(() => {
+    connectSettings()
+    return () => {
+      disposeSettings()
+    }
+  }, [me])
+
+  useEffect(() => {
+    console.log(playerSettings);
+  }, [playerSettings])
+
   if (league?.currentSeason)
   {
     return (
       <div>
-        <div className="bg-dark p-2 rounded mb-4">
-          <small>Liga</small>
-          <h2 className="display-5">{league.name}</h2>
+        <div className="bg-dark p-2 rounded mb-4 d-flex justify-content-between">
+          <div>
+            <small>Liga</small>
+            <h2 className="display-5">{league.name}</h2>
+          </div>
+          {(() => { if (playerSettings.settings?.defaultLeague?.id === id) {
+            return (<StarSvg filled={true} onClick={resetDefaultLeague}>Default</StarSvg>)
+          } else {
+            return (<StarSvg filled={false} onClick={setDefaultLeague}>Default</StarSvg>)
+          }
+          })()}
         </div>
         <SeasonView key={league.currentSeason} id={league.currentSeason}></SeasonView>
       </div>

@@ -24,7 +24,7 @@ const LeagueBySlug = () => {
   if (!leagueId) {
     return (<div>Not found</div>)    
   } else {
-    return (<LeagueView id={leagueId}></LeagueView>)
+    return (<LeagueView id={leagueId} slug={slug}></LeagueView>)
   }
 }
 

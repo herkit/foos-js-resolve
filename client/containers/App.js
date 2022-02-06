@@ -41,7 +41,7 @@ const App = () => {
         <div className='container'>
           <div className="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3">
             <a href='/' className='d-flex align-items-center col-md-3 mb-2 mb-md-0 text-white text-decoration-none navbar-brand'>Foos</a>
-            <ul className="nav col-12 col-md-auto justify-content-center mb-md-0">
+            <ul className="nav col-6 col-md-auto justify-content-center mb-md-0">
               <li>
                 <Link to={`/leagues`} className="nav-link px-2">Leagues</Link>
               </li>

@@ -12,8 +12,8 @@ const LoginInfo = () => {
   if (isLoggedIn)
     return (
       <div>
-        <span className="me-2">{me.name}</span>
-        <Gravatar className="me-2 rounded-circle bg-light" email={me.email} size={36} default="robohash"></Gravatar>
+        <span className="me-2 d-md-inline d-none">{me.name}</span>
+        <Gravatar className="me-2 rounded-circle bg-light d-md" email={me.email} size={36} default="robohash"></Gravatar>
         <Link 
           to="/" 
           className="btn btn-warning me-2" 
@@ -29,7 +29,7 @@ const LoginInfo = () => {
       return (
         <div>
           <Link to="/login" className="btn btn-outline-light me-2">Login</Link>
-          <Link to="/register" className="btn btn-warning">Sign-up</Link>
+          <Link to="/register" className="btn btn-success me-2 d-none d-md-inline">Sign-up</Link>
         </div>
       )
 }

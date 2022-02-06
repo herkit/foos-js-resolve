@@ -18,7 +18,7 @@ const RecordCard = ({record}) => (
     <div className="card-body">
       <h3 className='card-title h6'>{record.title}</h3>
       <div className='row'>
-        <div className='display-5 col-9'><PlayerName playerid={record.id}></PlayerName></div>
+        <div className='display-5 col-9 text-truncate'><PlayerName playerid={record.id}></PlayerName></div>
         <div className='display-5 col-3 text-end'>{record.record}</div>
       </div>
     </div>

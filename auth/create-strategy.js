@@ -8,7 +8,7 @@ const createStrategy = options => ({
     errorRedirect: error => `/error?text=${encodeURIComponent(error.message)}`,
     usernameField: 'username',
     passwordField: 'password',
-    successRedirect: "/leagues",
+    successRedirect: '/leagues',
     ...options
   }
 })

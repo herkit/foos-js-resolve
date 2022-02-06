@@ -33,13 +33,7 @@ const appConfig = {
       projection: 'common/read-models/leagues.projection.js',
       resolvers: 'common/read-models/leagues.resolvers.js',
       connectorName: 'default'
-    }/*,
-    {
-      name: 'Seasons',
-      projection: 'common/read-models/seasons.projection.js',
-      resolvers: 'common/read-models/seasons.resolvers.js',
-      connectorName: 'default'
-    }*/
+    }
   ],
   viewModels: [
     {
@@ -49,6 +43,10 @@ const appConfig = {
     {
       name: 'PlayerName',
       projection: 'common/view-models/player-names.projection.js',
+    },
+    {
+      name: 'PlayerSettings',
+      projection: 'common/view-models/player-settings.projection.js',
     },
     {
       name: 'LeagueData',

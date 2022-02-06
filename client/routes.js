@@ -1,6 +1,7 @@
 import React from 'react'
 import { Modal } from 'react-bootstrap'
 import { Navigate, Route, Routes } from 'react-router'
+import { Intro } from './components/Intro'
 import { LeagueBySlug } from './components/LeagueBySlug'
 import { LeagueCreate } from './components/LeagueCreate'
 import { LeagueSelect } from './components/LeagueSelect'
@@ -20,7 +21,7 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<SigninContainer />}>
-        <Route path="" element={<LeagueSelect />} />
+        <Route path="" element={<Intro />} />
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Login />} />
       </Route>
