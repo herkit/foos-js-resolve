@@ -22,6 +22,7 @@ const AppRoutes = () => {
       <Route path="/" element={<SigninContainer />}>
         <Route path="" element={<LeagueSelect />} />
         <Route path="login" element={<Login />} />
+        <Route path="register" element={<Login />} />
       </Route>
       <Route path="/" element={<App />}>
         <Route path="error" element={<Error />} />

@@ -13,8 +13,13 @@ export default {
         payload: {username, name, email, password: hashPassword(password), avatar}
       }
     },
-    deletePlayer: (state) =>
+    deletePlayer: (state, { aggregateId: playerId}) =>
     {
+      const jwt = jsonwebtoken.verify(token, jwtSecret)
+      validate.fieldRequired(jwt, 'id')
+      if (jwt.id != playerId || !jwt.superuser)
+        throw new Error("Only self or superuser can delete player")
+
       if (!state.createdAt)
         throw new Error('Player does not exist')
   

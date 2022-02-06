@@ -15,8 +15,6 @@ const getCookie = (cookieName) => {
 }
 
 const entryPoint = (clientContext, req) => {
-  /*const { constants, seedClientEnvs, utils, viewModels } = clientContext
-  const { getRootBasedUrl, getStaticBasedPath, jsonUtfStringify } = utils*/
   const { jwtCookie } = clientContext
   const appContainer = document.createElement('div')
   const redux = getRedux(clientContext.clientImports, history)

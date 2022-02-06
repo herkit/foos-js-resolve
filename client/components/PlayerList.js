@@ -3,6 +3,7 @@ import { useQuery, useCommand } from '@resolve-js/react-hooks'
 import PlayerDeleter from './PlayerDeleter'
 import PlayerCreate from './PlayerCreate'
 import { Outlet } from 'react-router'
+import LoggedInContent from './LoggedInContent'
 const PlayerList = () => {
   const [players, setPlayers] = useState([])
   const getPlayers = useQuery(
@@ -32,7 +33,7 @@ const PlayerList = () => {
     <div>
       <table className='table table-condensed'>
         <thead>
-          <tr><th>Name</th><th>Email</th></tr>
+          <tr><th>Name</th><th>Email</th><th></th></tr>
         </thead>
         <tbody>
         {players.map(({ id, name, email, avatar }) => (
@@ -40,12 +41,14 @@ const PlayerList = () => {
             <td className="lead">{name}</td>
             <td>{email}</td>
             <td>
-              <PlayerDeleter playerId={id} size="sm" onRemoveSuccess={(err, result) => {
-                console.log("player deleted")
-                setPlayers(
-                  players.filter((player) => player.id !== result.aggregateId)
-                )
-              }} />
+              <LoggedInContent requireSuperuser={true} showLoginLink={false}>
+                <PlayerDeleter playerId={id} size="sm" onRemoveSuccess={(err, result) => {
+                  console.log("player deleted")
+                  setPlayers(
+                    players.filter((player) => player.id !== result.aggregateId)
+                  )
+                }} />
+              </LoggedInContent>
             </td>
           </tr>
         ))}

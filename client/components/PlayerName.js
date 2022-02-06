@@ -14,7 +14,7 @@ const PlayerName = ({playerid}) => {
     return () => {
       dispose()
     }
-  }, [playerid])
+  }, [])
 
   if (player.deleted)
     return (<span style={{opacity: "0.5"}}>{player.name}</span>)

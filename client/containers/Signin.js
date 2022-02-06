@@ -13,7 +13,7 @@ const SigninContainer = () => {
   const stylesheetLink = {
     rel: 'stylesheet',
     type: 'text/css',
-    href: staticResolver('/bootstrap.css'),
+    href: staticResolver('/solar.css'),
   }
   const signinLink = {
     rel: 'stylesheet',

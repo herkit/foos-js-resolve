@@ -5,6 +5,7 @@ import { useStaticResolver } from '@resolve-js/react-hooks'
 import { Outlet } from 'react-router'
 import { Link } from 'react-router-dom'
 import LoggedInContent from '../components/LoggedInContent'
+import { LoginInfo } from '../components/LoginInfo'
 
 const App = () => {
   const staticResolver = useStaticResolver()
@@ -21,7 +22,7 @@ const App = () => {
   const stylesheetLink = {
     rel: 'stylesheet',
     type: 'text/css',
-    href: staticResolver('/bootstrap.css'),
+    href: staticResolver('/solar.css'),
   }
   const faviconLink = {
     rel: 'icon',
@@ -36,19 +37,27 @@ const App = () => {
   return (
     <div>
       <Helmet title="Foos" link={links} meta={[meta]} />
-      <Navbar>
-        <Navbar.Brand href="#home">
-          <Image
-            src={staticResolver('/resolve-logo.png')}
-            className="d-inline-block align-top"
-          />
-          <span>{'Foos'}</span>
-        </Navbar.Brand>
-        <Link to={`/leagues`} className="p-2">Leagues</Link>
-        <LoggedInContent requireSuperuser={true} showLoginLink={false}>
-          <Link to={`/players`} className="p-2">Players</Link>
-        </LoggedInContent>
-      </Navbar>
+      <header className='p-3 bg-dark text-white mb-4'>
+        <div className='container'>
+          <div className="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3">
+            <a href='/' className='d-flex align-items-center col-md-3 mb-2 mb-md-0 text-white text-decoration-none navbar-brand'>Foos</a>
+            <ul className="nav col-12 col-md-auto justify-content-center mb-md-0">
+              <li>
+                <Link to={`/leagues`} className="nav-link px-2">Leagues</Link>
+              </li>
+              
+              <LoggedInContent requireSuperuser={true} showLoginLink={false}>
+                <li>
+                  <Link to={`/players`} className="nav-link px-2">Players</Link>
+                </li>
+              </LoggedInContent>
+            </ul>
+            <div className="col-md-3 text-end">
+              <LoginInfo></LoginInfo>
+            </div>
+          </div>
+        </div>
+      </header>
       <div className="container">
         <Outlet></Outlet>
       </div>
