@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken'
 import jwtSecret from './jwt-secret'
 import hashPassword from './passwordhash'
 
-const API_GATEWAY_TIMEOUT = 30000
+const API_GATEWAY_TIMEOUT = 1500
 const routeLoginCallback = async ({ resolve }, username, password) => {
   const startTimestamp = Date.now()
   while (true) {

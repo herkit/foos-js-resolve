@@ -6,7 +6,7 @@ const readModel = {
         email: 'string',
         id: 'string'
       },
-      fields: ['name', 'email', 'password', 'avatar', 'currentRank', 'isSuperuser'],
+      fields: ['name', 'password', 'avatar', 'currentRank', 'isSuperuser'],
     })
   },
   [PLAYER_CREATED]: async (store, { aggregateId, payload: { name, email, avatar, password } }) => 

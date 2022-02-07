@@ -37,10 +37,13 @@ const App = () => {
   return (
     <div>
       <Helmet title="Foos" link={links} meta={[meta]} />
-      <header className='p-3 bg-dark text-white mb-4'>
+      <header className='p-1 p-md-3 bg-dark text-white mb-4'>
         <div className='container'>
-          <div className="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3">
-            <a href='/' className='d-flex align-items-center col-md-3 mb-2 mb-md-0 text-white text-decoration-none navbar-brand'>Foos</a>
+          <div className="d-flex flex-wrap align-items-center justify-content-between py-1 py-md-3">
+            <a href='/' className='d-flex align-items-center col-md-3 text-white text-decoration-none navbar-brand'>
+              <img src={staticResolver('/logo.svg')} alt="Foos" style={{height: "36px"}} className='d-none d-md-inline' />
+              <img src={staticResolver('/ball.svg')} alt="Foos" style={{height: "32px"}} className='d-md-none' />
+            </a>
             <ul className="nav col-6 col-md-auto justify-content-center mb-md-0">
               <li>
                 <Link to={`/leagues`} className="nav-link px-2">Leagues</Link>

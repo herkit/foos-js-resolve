@@ -12,7 +12,7 @@ const LoginInfo = () => {
   if (isLoggedIn)
     return (
       <div>
-        <span className="me-2 d-md-inline d-none">{me.name}</span>
+        <span className="me-2 d-lg-inline d-none">{me.name}</span>
         <Gravatar className="me-2 rounded-circle bg-light d-md" email={me.email} size={36} default="robohash"></Gravatar>
         <Link 
           to="/" 

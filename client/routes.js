@@ -11,19 +11,26 @@ import PlayerCreate from './components/PlayerCreate'
 import { PlayerList } from './components/PlayerList'
 import App from './containers/App'
 import SigninContainer from './containers/Signin'
+import { useLocation } from 'react-router-dom'
+import { AuthForm } from './components/AuthForm'
 
 const Error = () => {
   return (<div>Oops, something went wrong...</div>)
 }
 
 const AppRoutes = () => {
+  const location = useLocation();
 
   return (
     <Routes>
       <Route path="/" element={<SigninContainer />}>
         <Route path="" element={<Intro />} />
         <Route path="login" element={<Login />} />
-        <Route path="register" element={<Login />} />
+        <Route path="register" element={<AuthForm
+            buttonText="Create account"
+            action={`/api/register${location.search}`}
+            title="Create account"
+          />}/>
       </Route>
       <Route path="/" element={<App />}>
         <Route path="error" element={<Error />} />
