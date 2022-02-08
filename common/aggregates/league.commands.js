@@ -14,14 +14,14 @@ export default {
         payload: { name, rating: rating ?? "elo", owner: jwt.id }
       }
     },
-    startSeason: (state, { aggregateId, payload: { seasonid } }) => {
+    startSeason: (state, { aggregateId: leagueid, payload: { seasonid } }) => {
       if (state.currentSeason === seasonid)
         throw new Error("Season is currently in progress")
       if (state.seasons.find(s => s === seasonid))
         throw new Error("Season has been started before")
       return {
         type: SEASON_STARTED,
-        payload: { seasonid, leagueid: aggregateId }
+        payload: { seasonid, leagueid }
       }
     }
   }

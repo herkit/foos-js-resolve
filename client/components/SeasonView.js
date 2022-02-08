@@ -34,8 +34,6 @@ const SeasonView = ({ id }) => {
   })
   const { data: players, playersStatus } = useSelector(playersSelector)
 
-  console.log(players)
-
   useEffect(() => {
     connect()
     return () => {
