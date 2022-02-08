@@ -4,8 +4,10 @@ import PlayerDeleter from './PlayerDeleter'
 import PlayerCreate from './PlayerCreate'
 import { Outlet } from 'react-router'
 import LoggedInContent from './LoggedInContent'
+import { Modal } from 'react-bootstrap'
 const PlayerList = () => {
   const [players, setPlayers] = useState([])
+  const [showPlayerCreate, setShowPlayerCreate] = useState(false)
   const getPlayers = useQuery(
     { name: 'Players', resolver: 'all', args: {} },
     (error, result) => {
@@ -17,7 +19,7 @@ const PlayerList = () => {
   }, [])
 
   const onPlayerCreated = ({ playerId, payload: { name, email, avatar} }) => {
-    console.log("playerCreated", playerId, name, email, avatar )
+    setShowPlayerCreate(false)
     setPlayers([
       ...players,
       {
@@ -28,7 +30,7 @@ const PlayerList = () => {
       },
     ])
   }
-  /*<PlayerCreate onCreateSuccess={onPlayerCreated}></PlayerCreate>*/
+  /**/
   return (
     <div>
       <table className='table table-condensed'>
@@ -53,7 +55,23 @@ const PlayerList = () => {
           </tr>
         ))}
         </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3">
+              <a class="btn btn-primary" onClick={() => setShowPlayerCreate(true)}>Create User</a>
+            </td>
+          </tr>
+        </tfoot>
       </table>
+      <Modal backdrop="static" show={showPlayerCreate} onHide={() => setShowPlayerCreate(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Create Player</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body>
+          <PlayerCreate onCreateSuccess={onPlayerCreated}></PlayerCreate>
+        </Modal.Body>
+      </Modal>      
       <Outlet></Outlet>
     </div>
   )

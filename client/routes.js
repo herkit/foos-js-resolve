@@ -18,6 +18,10 @@ const Error = () => {
   return (<div>Oops, something went wrong...</div>)
 }
 
+const onCancelCreatePlayer = () => {
+  return (<Navigate to="/players"></Navigate>)
+}
+
 const AppRoutes = () => {
   const location = useLocation();
 
@@ -39,7 +43,7 @@ const AppRoutes = () => {
         <Route path="leagues/:slug" element={<LeagueBySlug />} />
         <Route path="players" element={<PlayerList />}>
           <Route path="create" element={
-            <Modal backdrop="static" show="true">
+            <Modal backdrop="static" show="true" onHide={onCancelCreatePlayer}>
               <Modal.Header closeButton>
                 <Modal.Title>Create Player</Modal.Title>
               </Modal.Header>

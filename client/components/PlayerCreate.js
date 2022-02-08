@@ -7,7 +7,6 @@ import { Button } from 'react-bootstrap'
 const PlayerCreate = ({ onCreateSuccess }) => {
   const [name, nameInput] = useInput({ type: "text", className: "form-control" })
   const [email, emailInput] = useInput({ type: "email", className: "form-control" })
-  const [avatar, avatarInput] = useInput({ type: "text", className: "form-control" })  
   const [password, passwordInput] = useInput({ type: "password", className: "form-control" })  
 
   const createPlayer = useCommand(
@@ -15,7 +14,7 @@ const PlayerCreate = ({ onCreateSuccess }) => {
       type: 'createPlayer',
       aggregateId: uuid(),
       aggregateName: 'Player',
-      payload: { name, email, avatar, password },
+      payload: { name, email, password },
     },
     (err, result) => {
       console.log(err, result)
@@ -36,10 +35,6 @@ const PlayerCreate = ({ onCreateSuccess }) => {
     <div className="form-group">
       <label>Password</label>
       {passwordInput}
-    </div>
-    <div className="form-group">
-      <label>Avatar</label>
-      {avatarInput}
     </div>
     <div className="form-footer">
     <Button variant="success" onClick={() => createPlayer()}>
