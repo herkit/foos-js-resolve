@@ -10,17 +10,19 @@ config:
   EVENTSTORE_MYSQL_DBNAME: foos-events
 
 ingress:
-  enabled: true
+  enabled: true 
   annotations:
     kubernetes.io/ingress.class: nginx
     kubernetes.io/tls-acme: "true"
     cert-manager.io/cluster-issuer: cert-manager-webhook-dnsimple-production
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
   hosts:
     - host: foos.app
       paths:
         - path: /
           pathType: ImplementationSpecific
-  tls: 
+  tls:
     - secretName: foos-appara-name-tls
       hosts:
-        - foos.app
+        - foos.app 

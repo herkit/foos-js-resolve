@@ -1,3 +1,4 @@
+import jsonwebtoken from 'jsonwebtoken'
 import hashPassword from "../../auth/passwordhash";
 import { PLAYER_CREATED, PLAYER_DELETED, PLAYER_WON_MATCH, PLAYER_LOST_MATCH, PLAYER_SET_DEFAULT_LEAGUE } from "../event-types";
 export default {
