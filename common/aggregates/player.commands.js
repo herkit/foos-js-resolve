@@ -1,5 +1,7 @@
 import jsonwebtoken from 'jsonwebtoken'
 import hashPassword from "../../auth/passwordhash";
+import jwtSecret from '../../auth/jwt-secret';
+import validate from './validation'
 import { PLAYER_CREATED, PLAYER_DELETED, PLAYER_WON_MATCH, PLAYER_LOST_MATCH, PLAYER_SET_DEFAULT_LEAGUE } from "../event-types";
 export default {
     createPlayer: (state, {payload: {username, name, email, password, avatar}}) => {
@@ -14,11 +16,11 @@ export default {
         payload: {username, name, email, password: hashPassword(password), avatar}
       }
     },
-    deletePlayer: (state, { aggregateId: playerId}) =>
+    deletePlayer: (state, { aggregateId: playerId}, { jwt: token }) =>
     {
       const jwt = jsonwebtoken.verify(token, jwtSecret)
       validate.fieldRequired(jwt, 'id')
-      if (jwt.id != playerId || !jwt.superuser)
+      if (jwt.id != playerId && !jwt.superuser)
         throw new Error("Only self or superuser can delete player")
       if (!state.createdAt)
         throw new Error('Player does not exist')
