@@ -1,4 +1,4 @@
-import { PLAYER_CREATED, PLAYER_DELETED, PLAYER_LOST_MATCH, PLAYER_WON_MATCH } from '../event-types'
+import { PLAYER_CREATED, PLAYER_DELETED, PLAYER_LOST_MATCH, PLAYER_PASSWORD_CHANGED, PLAYER_WON_MATCH } from '../event-types'
 const readModel = {
   Init: async (store) => {
     await store.defineTable('Players', {
@@ -32,6 +32,9 @@ const readModel = {
   },
   [PLAYER_WON_MATCH]: async (store, { aggregateId, payload: { rank } }) => {
     await store.update('Players', { id: aggregateId }, { $set: { currentRank: rank }})
+  },
+  [PLAYER_PASSWORD_CHANGED]: async (store, {aggregateId, payload: { password }}) => {
+    await store.update('Players', { id: aggregateId }, { $set: { password }})
   }
 }
 export default readModel
