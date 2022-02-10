@@ -1,8 +1,15 @@
 import jsonwebtoken from 'jsonwebtoken'
-import hashPassword from "../../auth/passwordhash";
 import jwtSecret from '../../auth/jwt-secret';
+import hashPassword from "../../auth/passwordhash";
 import validate from './validation'
-import { PLAYER_CREATED, PLAYER_DELETED, PLAYER_WON_MATCH, PLAYER_LOST_MATCH, PLAYER_SET_DEFAULT_LEAGUE } from "../event-types";
+import { 
+  PLAYER_CREATED,
+  PLAYER_DELETED, 
+  PLAYER_WON_MATCH,
+  PLAYER_LOST_MATCH,
+  PLAYER_SET_DEFAULT_LEAGUE,
+  PLAYER_PASSWORD_RESET_REQUESTED 
+} from "../event-types";
 export default {
     createPlayer: (state, {payload: {username, name, email, password, avatar}}) => {
       if (state.createdAt) throw new Error("The player already exists")
@@ -27,6 +34,34 @@ export default {
   
       return {
         type: PLAYER_DELETED
+      }
+    },
+    requestPasswordReset: (state, { aggregateId, payload: { token } }) => {
+      const jwt = jsonwebtoken.verify(token, jwtSecret)
+      if (jwt.id != aggregateId)
+        throw new Error("Token must match aggregate")
+
+      return {
+        type: PLAYER_PASSWORD_RESET_REQUESTED
+      }
+    },
+    forgetPasswordReset: (state, { payload: { handle }}) => {
+      return {
+        type: PLAYER_PASSWORD_RESET_FORGOTTEN,
+        payload: {
+          handle
+        }
+      }
+    },
+    changePassword: (state, { aggregateId, payload: { token, password }}, { jwt }) => {
+      const verifiedToken = token ? jsonwebtoken.verify(token, jwtSecret) : jsonwebtoken.verify(jwt, jwtSecret)     
+      
+      if (verifiedToken.id !== aggregateId)
+        throw new Error('Token does not match player')
+
+      return {
+        type: PLAYER_PASSWORD_CHANGED,
+        payload: { password }
       }
     },
     setDefaultLeague: (state, { payload: { id, slug }}) => {

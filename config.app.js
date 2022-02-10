@@ -62,7 +62,19 @@ const appConfig = {
       name: 'LeagueCreation', 
       source: 'common/sagas/league-creation.saga.js',
       connectorName: 'default'
+    },
+    { 
+      name: 'PasswordReset', 
+      source: 'common/sagas/password-reset.saga.js',
+      connectorName: 'default'
     }
+  ],
+  apiHandlers: [
+    {
+      path: '/api/passwordreset',
+      handler: 'common/api-handlers/reset-password.js',
+      method: 'POST',
+    },
   ],
   clientEntries: [
     [
