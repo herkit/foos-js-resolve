@@ -14,13 +14,13 @@ const byWinStreak = (a,b) => (b.longestWinStreak - a.longestWinStreak)
 const byLossStreak = (a,b) => (b.longestLossStreak - a.longestLossStreak)
 
 const RecordCard = ({record}) => (
-  <div className="card col-5 col-lg-4">
-    <div className="card-body">
-      <h3 className='card-title h6'>{record.title}</h3>
-      <div className='row'>
-        <div className='display-5 col-9 text-truncate'><PlayerName playerid={record.id}></PlayerName></div>
-        <div className='display-5 col-3 text-end'>{record.record}</div>
+  <div className="rounded bg-light bg-opacity-10 p-3">
+    <div className="d-flex">
+      <div className="w-75">
+        <h3 className="card-title h6">{record.title}</h3>
+        <div className="h4 text-truncate"><PlayerName playerid={record.id}></PlayerName></div>
       </div>
+      <div className="display-5 w-25 text-end">{record.record}</div>
     </div>
   </div>
 )
@@ -43,8 +43,8 @@ const SeasonView = ({ id }) => {
 
   return (<div>
     <div className='d-flex justify-content-between mb-4'>
-    {(() => { if (players?.records?.winStreak) { return <RecordCard record={players.records.winStreak} />}})()}
-    {(() => { if (players?.records?.lossStreak) { return <RecordCard record={players.records.lossStreak} />}})()}
+    {(() => { if (players?.records?.winStreak) { return <div className="w-50 pe-3" style={{maxWidth: "350px"}}><RecordCard record={players.records.winStreak} /></div> }})()}
+    {(() => { if (players?.records?.lossStreak) { return <div className="w-50 ps-3" style={{maxWidth: "350px"}}><RecordCard record={players.records.lossStreak} /></div> }})()}
     </div>
     <div>
       <table className="table scoreboard">

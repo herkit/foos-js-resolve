@@ -26,10 +26,12 @@ const LeagueSelect = ({ onLeagueSelected }) => {
   return leagues.length ? (<div>
     <h2>Leagues</h2>
     <div className="list-group">
-    {leagues.map(({id, name, slug}) => (<Link to={`/leagues/${slug}`} className="list-group-item list-group-item-action" key={id}>{name}</Link>))}
+    {leagues.map(({id, name, slug}) => (<Link to={`/leagues/${slug}`} className="list-group-item list-group-item-action h3" key={id}>{name}</Link>))}
     </div>
-    <LoggedInContent message="Log in to create a league">
-      <LeagueCreate onCreateSuccess={() => setRefresh(refresh + 1)}></LeagueCreate>
+    <LoggedInContent showLoginLink={false}>
+      <div>
+        <Link className='btn btn-primary' to="/leagues/create">Create your own league</Link>
+      </div>
     </LoggedInContent>
   </div>
   ) : (

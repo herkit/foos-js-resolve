@@ -13,6 +13,7 @@ import App from './containers/App'
 import SigninContainer from './containers/Signin'
 import { useLocation } from 'react-router-dom'
 import { AuthForm } from './components/AuthForm'
+import LoggedInContent from './components/LoggedInContent'
 
 const Error = () => {
   return (<div>Oops, something went wrong...</div>)
@@ -35,7 +36,7 @@ const AppRoutes = () => {
       <Route path="/" element={<App />}>
         <Route path="error" element={<Error />} />
         <Route path="leagues" element={<LeagueSelect />} />
-        <Route path="leagues/create" element={<LeagueCreate />} />
+        <Route path="leagues/create" element={<LoggedInContent message="Log in to create a league"><LeagueCreate onCreateSuccess={() => setRefresh(refresh + 1)}></LeagueCreate></LoggedInContent>} />
         <Route path="leagues/:slug" element={<LeagueBySlug />} />
         <Route path="players" element={<PlayerList />}>
           <Route path="create" element={
