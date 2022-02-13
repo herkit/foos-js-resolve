@@ -36,13 +36,14 @@ export default {
         type: PLAYER_DELETED
       }
     },
-    requestPasswordReset: (state, { aggregateId, payload: { token } }) => {
+    requestPasswordReset: (state, { aggregateId, payload: { token, email } }) => {
       const jwt = jsonwebtoken.verify(token, jwtSecret)
       if (jwt.id != aggregateId)
         throw new Error("Token must match aggregate")
 
       return {
-        type: PLAYER_PASSWORD_RESET_REQUESTED
+        type: PLAYER_PASSWORD_RESET_REQUESTED,
+        payload: { email }
       }
     },
     forgetPasswordReset: (state, { payload: { handle }}) => {

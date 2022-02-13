@@ -28,6 +28,7 @@ export default async (req, res) => {
       aggregateName: "Player",
       type: "requestPasswordReset",
       payload: {
+        email,
         token
       }
     };

@@ -14,6 +14,7 @@ import SigninContainer from './containers/Signin'
 import { useLocation } from 'react-router-dom'
 import { AuthForm } from './components/AuthForm'
 import LoggedInContent from './components/LoggedInContent'
+import { PasswordReset } from './components/PasswordReset'
 
 const Error = () => {
   return (<div>Oops, something went wrong...</div>)
@@ -32,6 +33,7 @@ const AppRoutes = () => {
             action={`/api/register${location.search}`}
             title="Create account"
           />}/>
+        <Route path="passwordreset/:handle" element={<PasswordReset />} />
       </Route>
       <Route path="/" element={<App />}>
         <Route path="error" element={<Error />} />

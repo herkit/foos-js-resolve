@@ -51,6 +51,6 @@ const prodConfig = {
     */ jwtCookie: {
     name: 'jwt',
     maxAge: 31536000000,
-  },
+  }
 }
 export default prodConfig
