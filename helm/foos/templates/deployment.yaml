@@ -57,16 +57,16 @@ spec:
                 name: {{$fullName}}-secrets
             {{- end }}
             {{- if .Values.configMapNames}}
-              {{- range .Values.configMapNames }}
-              - configMapRef:
-                  name: {{.}}
-              {{- end }}
+            {{- range .Values.configMapNames }}
+            - configMapRef:
+                name: {{.}}
+            {{- end }}
             {{- end }}
             {{- if .Values.secretNames}}
-              {{- range .Values.secretNames }}
-              - secretRef:
-                  name: {{.}}
-              {{- end }}
+            {{- range .Values.secretNames }}
+            - secretRef:
+                name: {{.}}
+            {{- end }}
             {{- end }}
           {{- end }}              
           resources:
