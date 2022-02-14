@@ -1,3 +1,4 @@
+import { useStaticResolver } from '@resolve-js/react-hooks'
 import React, { useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { AuthForm } from './AuthForm'
@@ -11,6 +12,7 @@ const Switch = props => {
 }
 
 const Login = (props) => {
+  const staticResolver = useStaticResolver()
   const location = useLocation()
   const [view, setView] = useState("login")
   return (
@@ -25,6 +27,13 @@ const Login = (props) => {
           <div className='mt-3'>
             No account yet? <a href="#" onClick={() => setView("signup")}>Signup here...</a>
           </div>
+          <div className='mt-3'>
+            <p>You can also login with:</p>
+            <a className='btn btn-outline-secondary' href={"/api/auth/slack"}>
+              <img src={staticResolver("/slack.svg")}></img>
+            </a>
+          </div>
+
         </div>
         <div case="signup">
           <AuthForm

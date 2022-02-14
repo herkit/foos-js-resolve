@@ -4,6 +4,13 @@ import Gravatar from "react-gravatar";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
+const Avatar = ({me}) => {
+  if (me.avatar)
+    return (<img className="me-2 rounded-circle bg-light d-md" height={36} src={me.avatar}></img>)
+  else
+    return (<Gravatar className="me-2 rounded-circle bg-light d-md" email={me.email} size={36} default="robohash"></Gravatar>)
+}
+
 const LoginInfo = () => {
   const me = useSelector((state) => state.jwt)
 
@@ -13,7 +20,7 @@ const LoginInfo = () => {
     return (
       <div>
         <span className="me-2 d-lg-inline d-none">{me.name}</span>
-        <Gravatar className="me-2 rounded-circle bg-light d-md" email={me.email} size={36} default="robohash"></Gravatar>
+        <Avatar me={me}></Avatar>
         <Link 
           to="/" 
           className="btn btn-warning me-2" 
