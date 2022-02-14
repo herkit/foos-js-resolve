@@ -8,12 +8,19 @@ export default {
       if (state.createdAt) throw new Error("The player already exists")
       if (!name) throw new Error("name is required")
       if (!email) throw new Error("email is required")
-      if (!password) throw new Error("password is required")
       if (!/^\w+([\+\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email))
         throw new Error("email is invalid");
+
+      const hashedPassword = password ? hashPassword(password) : null;
       return {
         type: PLAYER_CREATED,
-        payload: {username, name, email, password: hashPassword(password), avatar}
+        payload: {
+          username, 
+          name, 
+          email, 
+          password: hashedPassword, 
+          avatar
+        }
       }
     },
     deletePlayer: (state, { aggregateId: playerId}, { jwt: token }) =>

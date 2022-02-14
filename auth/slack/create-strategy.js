@@ -5,8 +5,8 @@ const createStrategy = options => ({
   options: {
     clientID: process.env.SLACK_CLIENT_ID,
     clientSecret: process.env.SLACK_CLIENT_SECRET,
-    skipUserProfile: true, // default
-    passReqToCallback: true,
+    skipUserProfile: false, // default
+    passReqToCallback: false,
     scope: ['identity.basic', 'identity.email', 'identity.avatar', 'identity.team'],
     ...options
   }

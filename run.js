@@ -49,9 +49,14 @@ void (async () => {
         },
         routes: [
           {
+            path: 'auth/slack',
+            method: 'GET',
+            callback: 'auth/slack/route-login.js',
+          },
+          {
             path: 'auth/slack/callback',
             method: 'GET',
-            callback: 'auth/route-login-callback.js',
+            callback: 'auth/slack/route-login-callback.js',
           },
         ],
       },
