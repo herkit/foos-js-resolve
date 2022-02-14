@@ -9,6 +9,9 @@ config:
   EVENTSTORE_MYSQL_USER: foos
   EVENTSTORE_MYSQL_DBNAME: foos-events
 
+secretNames: 
+  - foos-prod-secrets
+
 ingress:
   enabled: true 
   annotations:

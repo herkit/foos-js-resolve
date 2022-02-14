@@ -4,7 +4,7 @@ const devConfig = {
   runtime: {
     module: '@resolve-js/runtime-single-process',
     options: {
-      host: declareRuntimeEnv('HOST', 'localhost'),
+      host: declareRuntimeEnv('HOST', 'foos.localhost'),
       port: declareRuntimeEnv('PORT', '3000'),
     },
   },

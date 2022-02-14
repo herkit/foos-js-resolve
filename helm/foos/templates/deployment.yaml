@@ -56,6 +56,18 @@ spec:
             - secretRef:
                 name: {{$fullName}}-secrets
             {{- end }}
+            {{- if .Values.configMapNames}}
+              {{- range .Values.configMapNames }}
+              - configMapRef:
+                  name: {{.}}
+              {{- end }}
+            {{- end }}
+            {{- if .Values.secretNames}}
+              {{- range .Values.secretNames }}
+              - secretRef:
+                  name: {{.}}
+              {{- end }}
+            {{- end }}
           {{- end }}              
           resources:
             {{- toYaml .Values.resources | nindent 12 }}

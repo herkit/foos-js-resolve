@@ -17,8 +17,10 @@ services:
     image: foosjs
     ports:
       - "8081:80"
+    env_file:
+      - .env
     environment:
-      - DEBUG=* DEBUG_LEVEL=verbose yarn dev
+      - DEBUG=foosjs:* DEBUG_LEVEL=verbose yarn dev
       - JWT_SECRET=mysupersecretjwtsecret
       - MYSQL_HOST=db
       - MYSQL_USER=root
@@ -28,6 +30,7 @@ services:
       - EVENTSTORE_MYSQL_PASSWORD=mysecretpassword
       - HOST=0.0.0.0
       - PORT=80
+
   db:
     image: mysql
     command: --default-authentication-plugin=mysql_native_password

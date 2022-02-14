@@ -21,7 +21,7 @@ void (async () => {
   try {
     const moduleAuth = resolveModuleAuth([
       {
-        name: 'local-strategy',
+        name: 'local',
         createStrategy: 'auth/create-strategy.js',
         logoutRoute: {
           path: 'logout',
@@ -36,6 +36,21 @@ void (async () => {
           {
             path: 'login',
             method: 'POST',
+            callback: 'auth/route-login-callback.js',
+          },
+        ],
+      },
+      {
+        name: 'slack',
+        createStrategy: 'auth/slack/create-strategy.js',
+        logoutRoute: {
+          path: 'logout/slack',
+          method: 'POST',
+        },
+        routes: [
+          {
+            path: 'auth/slack/callback',
+            method: 'GET',
             callback: 'auth/route-login-callback.js',
           },
         ],

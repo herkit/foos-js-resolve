@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux';
 import { Navigate } from 'react-router'
 import { Link } from 'react-router-dom';
+import AnonymousContent from './AnonymousContent';
 
 const Intro = () => {
   const [league, setLeague] = useState();
@@ -27,7 +28,7 @@ const Intro = () => {
   }, [me])
 
 
-  if (league)
+  if (league && league !== undefined)
     return (<Navigate to={`/leagues/${league.slug}`} />)
   else 
   return (
@@ -36,6 +37,10 @@ const Intro = () => {
         <div className='display-4 mb-4'>Manage your foosball league using foos.app!</div>
         <div className='lead'>Foos.app is a fully eventsourced foosball management application. We aim to give you a fast and convenient way to register your fooball matches.</div>
         <div className='mt-4'>
+          <AnonymousContent>
+            <Link className='btn btn-outline-primary btn-lg me-2' to={"/register"}>Sign up</Link>
+            <Link className='btn btn-outline-primary btn-lg me-2' to={"/login"}>Log in</Link>
+          </AnonymousContent>
           <Link className='btn btn-primary btn-lg' to={"/leagues"}>Find a league to join</Link>
         </div>
       </div>

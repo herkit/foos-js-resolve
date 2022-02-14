@@ -4,11 +4,16 @@
 
 replicaCount: 1
 
+secrets: {}
+config: {}
+secretNames: []
+configMapNames: []
+
 image:
   repository: herkit/foosjs
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "0.0.8"
+  tag: "0.0.9"
 
 imagePullSecrets: []
 nameOverride: ""
