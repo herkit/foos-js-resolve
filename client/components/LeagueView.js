@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { useCommand, useViewModel } from '@resolve-js/react-hooks'
 import { SeasonView } from './SeasonView'
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux'
+import { v4 as uuid } from 'uuid'
+import LoggedInContent from './LoggedInContent';
+import ConfirmButton from './ConfirmButton'
 
 const StarSvg = ({filled, onClick, size}) => {
   const style = {
@@ -36,7 +39,7 @@ const StarSvg = ({filled, onClick, size}) => {
 const LeagueView = ({id, slug}) => {
   if (!id) throw new Error("league id must be set")
 
-  const [league, setLeague] = useState()
+  const [league, setLeague] = useState({ id: null, rating: "elo" })
   const [playerSettings, setPlayerSettings] = useState({ name: "", settings: {} })
   const me = useSelector((state) => state.jwt)
 
@@ -64,6 +67,19 @@ const LeagueView = ({id, slug}) => {
     else
       console.log(res)
   })
+
+  const createNewSeason =  useCommand({
+    aggregateName: "Season",
+    aggregateId: uuid(),
+    type: "createSeason",
+    payload: { leagueid: id, rating: league.rating }
+  }, (err, res) => {
+    if (err)
+      console.error(err)
+    else
+      console.log(res)
+  })
+  
   const resetDefaultLeague = useCommand({
     type: 'resetDefaultLeague',
     aggregateId: me.id,
@@ -110,6 +126,12 @@ const LeagueView = ({id, slug}) => {
           })()}
         </div>
         <SeasonView key={league.currentSeason} id={league.currentSeason}></SeasonView>
+        <LoggedInContent showLoginLink={false} requireSuperuser={true}>
+          <div className='mt-3 bg-dark p-2 rounded'>
+            <h3 className='h6'>Control panel</h3>
+            <ConfirmButton onConfirm={createNewSeason} text={"New season"} confirmText={"Sure?"} style={{ width: "14ch"}}></ConfirmButton>
+          </div>
+        </LoggedInContent>      
       </div>
     )
   }

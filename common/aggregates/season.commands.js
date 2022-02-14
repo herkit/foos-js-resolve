@@ -4,6 +4,8 @@ export default {
     createSeason: (state, { payload: { leagueid, rating } }) => {
       if (state.createdAt)
         throw new Error("Season has already been created")
+      if (!leagueid)
+        throw new Error("League must be specified")
       return {
         type: SEASON_CREATED,
         payload: { leagueid: leagueid, rating: rating ?? "basic" }

@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { Button } from 'react-bootstrap'
 import { useCommand } from '@resolve-js/react-hooks'
+import ConfirmButton from './ConfirmButton'
 
 const PlayerDeleter = ({ playerId, onRemoveSuccess, size }) => {
-  var confirmTimeout;
-  const buttonStyle = {
-    width: "10ch"
-  }
-  const [confirm, setConfirm] = useState(false);
+  const buttonStyle = { width: "10ch" }
+
   const deletePlayerCommand = useCommand(
     {
       type: 'deletePlayer',
@@ -17,21 +14,7 @@ const PlayerDeleter = ({ playerId, onRemoveSuccess, size }) => {
     onRemoveSuccess
   )
 
-  useEffect(() => {
-    if (confirm)
-      confirmTimeout = setTimeout(() => setConfirm(false), 2500)
-
-    return () => {
-      if (confirmTimeout)
-        clearTimeout(confirmTimeout)
-    }
-  }, [confirm]);
-
-  const confirmDelete = () => {
-    setConfirm(true)
-  }
-
-  return confirm ? <Button onClick={deletePlayerCommand} className="btn-danger" style={buttonStyle} size={size}>Sure?</Button> : <Button onClick={confirmDelete} style={buttonStyle} size={size}>Delete</Button>
+  return <ConfirmButton onConfirm={deletePlayerCommand} text={"Delete"} confirmText={"Sure?"} size={size} style={buttonStyle}></ConfirmButton>
 }
 
 export default PlayerDeleter

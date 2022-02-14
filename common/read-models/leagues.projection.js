@@ -14,10 +14,10 @@ const readModel = {
       indexes: {
         id: 'string'
       },
-      fields: ['name', 'slug', 'owner', 'admins']
+      fields: ['name', 'slug', 'owner', 'admins', 'rating']
     })
   },
-  [LEAGUE_CREATED]: async (store, { aggregateId, payload: { name, owner } }) => 
+  [LEAGUE_CREATED]: async (store, { aggregateId, payload: { name, owner, rating } }) => 
   {
     const slugBase = slugify(name).toLowerCase()
     var slug = slugBase
@@ -36,7 +36,7 @@ const readModel = {
     await store.update(
       'Leagues',
       { id: aggregateId },
-      { $set: { name, slug, owner, admins: [owner] } },
+      { $set: { name, slug, owner, admins: [owner], rating } },
       { upsert: true }
     )
   }/*,
