@@ -28,7 +28,7 @@ const Intro = () => {
   }, [me])
 
 
-  if (league && league !== undefined)
+  if (league && league.slug !== undefined)
     return (<Navigate to={`/leagues/${league.slug}`} />)
   else 
   return (
