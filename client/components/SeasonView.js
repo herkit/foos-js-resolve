@@ -13,6 +13,14 @@ const byRankDesc = (a,b) => (b.rank - a.rank)
 const byWinStreak = (a,b) => (b.longestWinStreak - a.longestWinStreak)
 const byLossStreak = (a,b) => (b.longestLossStreak - a.longestLossStreak)
 
+const classesByRank = (rank) => {
+  if (rank == 0)
+    return "h4 text-primary";
+  if (rank < 3)
+    return "h4 text-success";
+  return "h4";
+}
+
 const RecordCard = ({record}) => (
   <div className="rounded bg-light bg-opacity-10 p-3">
     <div className="d-flex">
@@ -47,21 +55,21 @@ const SeasonView = ({ id }) => {
     {(() => { if (players?.records?.lossStreak) { return <div className="w-50 ps-3" style={{maxWidth: "350px"}}><RecordCard record={players.records.lossStreak} /></div> }})()}
     </div>
     <div>
-      <table className="table scoreboard">
+      <table className="table">
         <thead>
-          <tr>
+          <tr className="h5">
             <th className='text-start'>Player</th>
-            <th className='text-center'>Played</th>
-            <th className='text-center'>Win/loss ratio</th>
+            <th className='text-center d-none d-md-table-cell'>Played</th>
+            <th className='text-center d-none d-sm-table-cell'><span className="d-none d-md-inline">Win/loss ratio</span><span className="d-inline d-md-none">W/L</span></th>
             <th className='text-end'>Rank</th>
           </tr>
         </thead>
         <tbody>
-          {players?.ranks?.map((player) => (
-          <tr key={player.id}>
+          {players?.ranks?.map((player, idx) => (
+          <tr key={player.id} className={ classesByRank(idx) }>
             <td className='text-start'><PlayerName playerid={player.id}></PlayerName></td>
-            <td className='text-center'>{player.played}</td>
-            <td className='text-center'>{player.lossCount > 0 ? (player.winCount / player.lossCount).toFixed(2) : "No loss"}</td>
+            <td className='text-center d-none d-md-table-cell'>{player.played}</td>
+            <td className='text-center d-none d-sm-table-cell'>{player.lossCount > 0 ? (player.winCount / player.lossCount).toFixed(2) : "No loss"}</td>
             <td className='text-end'>{player.rank}</td>
           </tr>))}
         </tbody>
