@@ -115,7 +115,7 @@ const LeagueView = ({id, slug}) => {
       <div>
         <div className="bg-dark p-2 rounded mb-4 d-flex justify-content-between">
           <div>
-            <small>Liga</small>
+            <small>League</small>
             <h2 className="display-5">{league.name}</h2>
           </div>
           {(() => { if (playerSettings.settings?.defaultLeague?.id === id) {
