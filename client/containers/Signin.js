@@ -25,7 +25,11 @@ const SigninContainer = () => {
     type: 'image/png',
     href: staticResolver('/favicon.png'),
   }
-  const links = [bootstrapLink, stylesheetLink, signinLink, faviconLink]
+  const pwaManifestLink = {
+    rel: "manifest",
+    href: staticResolver("/manifest.json")
+  }
+  const links = [bootstrapLink, stylesheetLink, signinLink, faviconLink, pwaManifestLink]
   const meta = {
     name: 'viewport',
     content: 'width=device-width, initial-scale=1',

@@ -29,7 +29,11 @@ const App = () => {
     type: 'image/png',
     href: staticResolver('/favicon.png'),
   }
-  const links = [bootstrapLink, stylesheetLink, scoreboardLink, faviconLink]
+  const pwaManifestLink = {
+    rel: "manifest",
+    href: staticResolver("/manifest.json")
+  }
+  const links = [bootstrapLink, stylesheetLink, scoreboardLink, faviconLink, pwaManifestLink]
   const meta = {
     name: 'viewport',
     content: 'width=device-width, initial-scale=1',

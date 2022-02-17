@@ -6,6 +6,7 @@ import AppRoutes from './routes'
 import { createResolveStore, ResolveReduxProvider } from '@resolve-js/redux'
 import getRedux from './get-redux'
 import jsonwebtoken from 'jsonwebtoken'
+import * as serviceWorker from './service-worker'
 
 const getCookie = (cookieName) => {
   return document.cookie
@@ -19,6 +20,15 @@ const entryPoint = (clientContext, req) => {
   const appContainer = document.createElement('div')
   const redux = getRedux(clientContext.clientImports, history)
   const jwt = {}
+
+  serviceWorker.register();
+
+  window.addEventListener("load", () => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/static/service-worker.js");
+    }
+  });
+  
   try {
     Object.assign(jwt, jsonwebtoken.decode(getCookie(jwtCookie.name)))
   } catch (e) {}
