@@ -6,6 +6,7 @@ const prodConfig = {
     options: {
       host: declareRuntimeEnv('HOST', 'localhost'),
       port: declareRuntimeEnv('PORT', '3000'),
+      emulateWorkerLifetimeLimit: 43200000
     },
   },
   rootPath: '',
