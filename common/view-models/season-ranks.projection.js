@@ -87,7 +87,7 @@ export default {
       played: p.played + 1,
       winCount: p.winCount + 1,
       winStreak: p.winStreak + 1,
-      longestWinStreak: Math.max(p.winStreak + 1, p.winStreak),
+      longestWinStreak: Math.max(p.winStreak + 1, p.longestWinStreak, 0),
       lossStreak: 0
     })),
     ...loserranks.map((p) => ({
