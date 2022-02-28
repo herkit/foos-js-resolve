@@ -113,10 +113,10 @@ const LeagueView = ({id, slug}) => {
   {
     return (
       <div>
-        <div className="bg-dark p-2 rounded mb-4 d-flex justify-content-between">
+        <div className="bg-dark p-2 rounded mb-2 d-flex justify-content-between">
           <div>
-            <small>League</small>
-            <h2 className="display-5">{league.name}</h2>
+            <small className='d-none d-md-block'>League</small>
+            <h2 className="display-5 mb-0">{league.name}</h2>
           </div>
           {(() => { if (playerSettings.settings?.defaultLeague?.id === id) {
             return (<StarSvg filled={true} onClick={resetDefaultLeague}>Default</StarSvg>)

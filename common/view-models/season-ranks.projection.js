@@ -45,7 +45,7 @@ const calculateBasic = ({ totalwinner, totalloser }) => {
 
 
 export default {
-  Init: () => ( { ranks: [], rankhistory: {}, rating: "basic" }),
+  Init: () => ( { ranks: [], rankhistory: {}, rating: "basic", recentMatches: [] }),
   [SEASON_CREATED]: (state, { payload: { rating } }) => ({
     ...state,
     rating: rating ?? state.rating
@@ -110,7 +110,7 @@ export default {
       ranks: ranks.sort((a, b) => b.rank - a.rank),
       rankhistory: {
         ...state.rankhistory,
-        ...ranks.reduce((playersState, { id, rank }) => ({
+        ...rankUpdates.reduce((playersState, { id, rank }) => ({
           ...playersState,
           [id]: [
             ...state.rankhistory[id] ?? [],
@@ -121,7 +121,11 @@ export default {
       records: {
         winStreak: { title: "Longest Win Streak", id: lws.id, record: lws.longestWinStreak },
         lossStreak: { title: "Longest Loss Streak", id: lls.id, record: lls.longestLossStreak },
-      }
+      },
+      recentMatches: [
+        { timestamp, winners, losers },
+        ...state.recentMatches
+      ].slice(0, 5)
     }
 
     return ({

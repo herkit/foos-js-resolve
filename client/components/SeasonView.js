@@ -49,13 +49,13 @@ const SeasonView = ({ id }) => {
     }
   }, [])
 
-  return (<div>
-    <div className='d-flex justify-content-between mb-4'>
-    {(() => { if (players?.records?.winStreak) { return <div className="w-50 pe-3" style={{maxWidth: "350px"}}><RecordCard record={players.records.winStreak} /></div> }})()}
-    {(() => { if (players?.records?.lossStreak) { return <div className="w-50 ps-3" style={{maxWidth: "350px"}}><RecordCard record={players.records.lossStreak} /></div> }})()}
+  return (<div className='d-flex flex-lg-column flex-column-reverse my-2'>
+    <div className='d-flex justify-content-between my-2'>
+    {(() => { if (players?.records?.winStreak) { return <div className="w-50 pe-2" style={{maxWidth: "350px"}}><RecordCard record={players.records.winStreak} /></div> }})()}
+    {(() => { if (players?.records?.lossStreak) { return <div className="w-50 ps-2" style={{maxWidth: "350px"}}><RecordCard record={players.records.lossStreak} /></div> }})()}
     </div>
-    <div>
-      <table className="table">
+    <div className='my-2'>
+      <table className="table my-0">
         <thead>
           <tr className="h5">
             <th className='text-start'>Player</th>
@@ -77,7 +77,7 @@ const SeasonView = ({ id }) => {
     </div>
 
     <LoggedInContent>
-      <button className="btn btn-primary" onClick={() => setShowCreateMatch(true)}>New Match</button>
+      <button className="btn btn-primary my-2" onClick={() => setShowCreateMatch(true)}>New Match</button>
       <Modal show={showCreateMatch} onHide={() => setShowCreateMatch(false)}>
         <Modal.Header>
           <h2>New Match</h2>
@@ -87,6 +87,20 @@ const SeasonView = ({ id }) => {
         </Modal.Body>
       </Modal>
     </LoggedInContent>
+
+    <div className='d-none d-lg-inline my-2'>
+      <div className="ticker-wrap">
+        <div className="ticker">
+          {players?.recentMatches?.map((match, idx) => (
+            <div className="ticker__item" key={match.timestamp}>
+              {new Date(match.timestamp).toLocaleDateString()}:
+              {match.winners.map((id, idx) => (<PlayerName playerid={id} className='ms-1' />))}<span className='ms-1'>won against</span>
+              {match.losers.map((id, idx) => (<PlayerName playerid={id} className='ms-1' />))}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   </div>)
 }
 
