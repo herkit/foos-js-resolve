@@ -8,10 +8,25 @@ import { Helmet } from 'react-helmet'
 import { Modal } from 'react-bootstrap'
 import { Navigate } from 'react-router'
 import LoggedInContent from './LoggedInContent'
+import Moment from 'react-moment'
 
 const byRankDesc = (a,b) => (b.rank - a.rank)
 const byWinStreak = (a,b) => (b.longestWinStreak - a.longestWinStreak)
 const byLossStreak = (a,b) => (b.longestLossStreak - a.longestLossStreak)
+
+const NoRenderContainer = ({children}) => {
+  return (children);
+}
+
+const millisecondsSinceMidnight = () => {
+  const now = new Date();
+  const then = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        0,0,0);
+  return now.getTime() - then.getTime();
+}
 
 const classesByRank = (rank) => {
   if (rank == 0)
@@ -89,13 +104,21 @@ const SeasonView = ({ id }) => {
     </LoggedInContent>
 
     <div className='d-none d-lg-inline my-2'>
-      <div className="ticker-wrap">
+      <div className="ticker-wrap bg-dark">
         <div className="ticker">
           {players?.recentMatches?.map((match, idx) => (
             <div className="ticker__item" key={match.timestamp}>
-              {new Date(match.timestamp).toLocaleDateString()}:
-              {match.winners.map((id, idx) => (<PlayerName playerid={id} className='ms-1' />))}<span className='ms-1'>won against</span>
-              {match.losers.map((id, idx) => (<PlayerName playerid={id} className='ms-1' />))}
+              <Moment date={new Date(match.timestamp)} className='text-light' fromNowDuring={millisecondsSinceMidnight()} format='ll[:]'></Moment>
+              {match.winners.map((id, idx) => (
+                <NoRenderContainer>
+                  {idx > 0 ? <span>&nbsp;and&nbsp;</span> : null}
+                  <PlayerName playerid={id} className='ms-1' />
+                </NoRenderContainer>))}<span className='ms-1'>won against</span>
+              {match.losers.map((id, idx) => (
+                <NoRenderContainer>
+                  {idx > 0 ? <span>&nbsp;and&nbsp;</span> : null}
+                  <PlayerName playerid={id} className='ms-1' />
+                </NoRenderContainer>))}
             </div>
           ))}
         </div>
