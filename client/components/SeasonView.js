@@ -110,12 +110,12 @@ const SeasonView = ({ id }) => {
             <div className="ticker__item" key={match.timestamp}>
               <Moment date={new Date(match.timestamp)} className='text-light' fromNowDuring={millisecondsSinceMidnight()} format='ll[:]'></Moment>
               {match.winners.map((id, idx) => (
-                <NoRenderContainer>
+                <NoRenderContainer key={idx}>
                   {idx > 0 ? <span>&nbsp;and&nbsp;</span> : null}
                   <PlayerName playerid={id} className='ms-1' />
                 </NoRenderContainer>))}<span className='ms-1'>won against</span>
               {match.losers.map((id, idx) => (
-                <NoRenderContainer>
+                <NoRenderContainer key={idx}>
                   {idx > 0 ? <span>&nbsp;and&nbsp;</span> : null}
                   <PlayerName playerid={id} className='ms-1' />
                 </NoRenderContainer>))}

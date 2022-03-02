@@ -33,15 +33,15 @@ const SingleMatchCreate = ({ season, onDone, onCancel }) => {
     <h3>Single</h3>
     <Form.Group controlId="formWinner">
       <Form.Label>Winner</Form.Label>
-      <PlayerSelect onSelected={(p) => setWinner(p)}></PlayerSelect>
+      <PlayerSelect onSelected={(p) => setWinner(p)} unselectedText="W"></PlayerSelect>
     </Form.Group>
     <Form.Group controlId="formLoser">
       <Form.Label>Loser</Form.Label>
-      <PlayerSelect onSelected={(p) => setLoser(p)}></PlayerSelect>
+      <PlayerSelect onSelected={(p) => setLoser(p)} unselectedText="L"></PlayerSelect>
     </Form.Group>
     <Form.Group className="mt-4">
-      <Button onClick={registerMatch}>Add</Button> 
-      <Button onClick={cancelMatch}>Cancel</Button>
+      <Button onClick={registerMatch} className="me-2" variant="primary" style={{"width": "10ch"}}>Add</Button> 
+      <Button onClick={cancelMatch} variant="outline-primary" style={{"width": "10ch"}}>Cancel</Button>
     </Form.Group>
   </Form>)
 }

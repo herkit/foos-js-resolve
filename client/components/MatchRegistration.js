@@ -22,9 +22,9 @@ const MatchRegistration = ({season, onCancel, onCreated}) => {
             return <DoubleMatchCreate season={season} onDone={onDone} onCancel={onCancel}></DoubleMatchCreate>
           default:
             return <FormGroup>
-              <Button onClick={() => setRegistration("single")}>Single</Button>
-              <Button onClick={() => setRegistration("double")}>Double</Button>
-              <Button onClick={onCancel}>Cancel</Button>
+              <Button onClick={() => setRegistration("single")} className="me-2" size="lg" style={{"width": "14ch"}}>Single</Button>
+              <Button onClick={() => setRegistration("double")} className="me-2" size="lg" style={{"width": "14ch"}}>Double</Button>
+              <Button onClick={onCancel} variant="outline-primary" size="lg">Cancel</Button>
             </FormGroup>
         }
       })()}

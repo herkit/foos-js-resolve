@@ -35,17 +35,17 @@ const DoubleMatchCreate = ({ season, onDone, onCancel }) => {
     <h3>Double</h3>
     <Form.Group controlId="formWinner">
       <Form.Label>Winners</Form.Label>
-      <PlayerSelect onSelected={(p) => setWinner1(p)}></PlayerSelect>
-      <PlayerSelect onSelected={(p) => setWinner2(p)}></PlayerSelect>
+      <PlayerSelect onSelected={(p) => setWinner1(p)} unselectedText="W1"></PlayerSelect>
+      <PlayerSelect onSelected={(p) => setWinner2(p)} unselectedText="W2"></PlayerSelect>
     </Form.Group>
     <Form.Group controlId="formLoser">
       <Form.Label>Losers</Form.Label>
-      <PlayerSelect onSelected={(p) => setLoser1(p)}></PlayerSelect>
-      <PlayerSelect onSelected={(p) => setLoser2(p)}></PlayerSelect>
+      <PlayerSelect onSelected={(p) => setLoser1(p)} unselectedText="L1"></PlayerSelect>
+      <PlayerSelect onSelected={(p) => setLoser2(p)} unselectedText="L2"></PlayerSelect>
     </Form.Group>
     <Form.Group className="mt-4">
-      <Button onClick={registerMatch}>Add</Button>
-      <Button onClick={cancelMatch}>Cancel</Button>
+      <Button onClick={registerMatch} className="me-2" variant="primary" style={{"width": "10ch"}}>Add</Button> 
+      <Button onClick={cancelMatch} variant="outline-primary" style={{"width": "10ch"}}>Cancel</Button>
     </Form.Group>
   </Form>)
 }
