@@ -10,14 +10,14 @@ const PlayerAvatar = ({player, unselectedText}) => {
     else
       return (<Gravatar className="me-2 rounded-circle bg-light d-md" email={player.email} size={64} default="robohash"></Gravatar>)
   } else {
-    return (<svg className='rounded-circle border' xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" width="64" height="64">
+    return (<svg className='me-2 rounded-circle' xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" width="64" height="64">
     <rect width="100%" height="100%" fill="#868e96"></rect>
     <text textAnchor="middle" x="50%" y="50%" fill="#dee2e6" dy=".5em">{unselectedText ?? "P"}</text>
   </svg>)
   }
 }
 
-const PlayerSelect = ({player, onSelected, unselectedText}) => {
+const PlayerSelect = ({player, onSelected, unselectedText, variant}) => {
   var selectPlayerTimeout
   const client = useClient()
   const [selected, setSelected] = useState(player)
@@ -53,17 +53,18 @@ const PlayerSelect = ({player, onSelected, unselectedText}) => {
 
   }, [selectedPlayer])
 
+  const shortText = unselectedText.match(/(?:^|\W)[\w]/g).map(l => l.trim().toUpperCase()).join("").replace("-", "");
   return (
     <div className='my-2'>
-      <div onClick={() => setShowSelect(true)} className='d-flex d-flex-row align-items-center'>
-        <PlayerAvatar player={selectedPlayer} unselectedText={unselectedText}></PlayerAvatar>
-        <div className={`h3 ${ showSelect ? "d-none": ""}`}>{selectedPlayer?.name}</div>
+      <div onClick={() => setShowSelect(true)} className={`d-flex d-flex-row align-items-center rounded-pill p-1 btn btn-${ selected ? variant ?? "secondary" : "outline-secondary" }`}>
+        <PlayerAvatar player={selectedPlayer} unselectedText={shortText}></PlayerAvatar>
+        <div className={`h3 ${ showSelect ? "d-none": ""}`}>{selectedPlayer?.name ?? unselectedText}</div>
       </div>
       <div className={`${ showSelect ? "d-block": "d-none"} bg-dark align-items-center`} style={{ "position": "absolute", "left": "0", "right": "0", "top": "0", "bottom": "0"}}
         onClick={() => setShowSelect(false)}
       >
         {players?.map((p, idx) => (
-          <a className={`btn ${p.id == selected ? "btn-secondary" : "btn-outline-secondary"} rounded-pill m-1`} key={p.id} onClick={() => {
+          <a className={`btn ${p.id == selected ? "btn-secondary" : "btn-outline-secondary" } rounded-pill m-1`} key={p.id} onClick={() => {
             setSelected(p.id)
             if (onSelected && typeof(onSelected) === "function")
               onSelected(p.id);

@@ -30,14 +30,11 @@ const SingleMatchCreate = ({ season, onDone, onCancel }) => {
   }
 
   return (<Form>
-    <h3>Single</h3>
     <Form.Group controlId="formWinner">
-      <Form.Label>Winner</Form.Label>
-      <PlayerSelect onSelected={(p) => setWinner(p)} unselectedText="W"></PlayerSelect>
+      <PlayerSelect onSelected={(p) => setWinner(p)} unselectedText="Winner" variant="success"></PlayerSelect>
     </Form.Group>
     <Form.Group controlId="formLoser">
-      <Form.Label>Loser</Form.Label>
-      <PlayerSelect onSelected={(p) => setLoser(p)} unselectedText="L"></PlayerSelect>
+      <PlayerSelect onSelected={(p) => setLoser(p)} unselectedText="Loser" variant="warning"></PlayerSelect>
     </Form.Group>
     <Form.Group className="mt-4">
       <Button onClick={registerMatch} className="me-2" variant="primary" style={{"width": "10ch"}}>Add</Button> 
