@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux'
 import { v4 as uuid } from 'uuid'
 import LoggedInContent from './LoggedInContent';
 import ConfirmButton from './ConfirmButton'
+import { useReduxReadModel } from '@resolve-js/redux'
 
 const StarSvg = ({filled, onClick, size}) => {
   const style = {
@@ -43,6 +44,20 @@ const LeagueView = ({id, slug}) => {
   const [playerSettings, setPlayerSettings] = useState({ name: "", settings: {} })
   const me = useSelector((state) => state.jwt)
 
+  const { request: getPlayers } = useReduxReadModel(
+    {
+      name: 'Players',
+      resolver: 'all',
+      args: {
+        filter: 'none',
+      },
+    },
+    [],
+    {
+      selectorId: 'all-players'
+    }
+  )
+  
   const { connect: connectSettings, dispose: disposeSettings } = useViewModel(
     'PlayerSettings',
     [me.id],
@@ -92,6 +107,7 @@ const LeagueView = ({id, slug}) => {
   })  
 
   useEffect(() => {
+    getPlayers()
     connect()
     return () => {
       dispose()
@@ -104,10 +120,6 @@ const LeagueView = ({id, slug}) => {
       disposeSettings()
     }
   }, [me])
-
-  useEffect(() => {
-    console.log(playerSettings);
-  }, [playerSettings])
 
   if (league?.currentSeason)
   {

@@ -93,7 +93,7 @@ const SeasonView = ({ id }) => {
 
     <LoggedInContent>
       <button className="btn btn-primary my-2" onClick={() => setShowCreateMatch(true)}>New Match</button>
-      <Modal show={showCreateMatch} onHide={() => setShowCreateMatch(false)}>
+      <Modal fullscreen={"md-down"} show={showCreateMatch} onHide={() => setShowCreateMatch(false)}>
         <Modal.Header>
           <h2>New Match</h2>
         </Modal.Header>
