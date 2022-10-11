@@ -1,7 +1,8 @@
-import { useReduxViewModel } from '@resolve-js/redux';
+import { useReduxReadModelSelector, useReduxViewModel } from '@resolve-js/redux';
 import { useSelector } from 'react-redux';
 import { Line } from 'react-chartjs-2';
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
+
 import {
   Chart as ChartJS,
   LineController,
@@ -12,6 +13,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import { ConfigService } from 'aws-sdk';
 
 export const options = {
   responsive: true,
@@ -56,8 +58,12 @@ const SeasonHistoryChart = ({id}) =>
     name: "SeasonRanks", 
     aggregateIds: [id],
   });
+  const { status: playerStatus, data: players } = useReduxReadModelSelector("all-players")
 
-  const { data: seasonRanks, seasonRanksStatus } = useSelector(playersSelector)
+  const [ graphData, setGraphData ] = useState({ labels: [], datasets: [] });
+  const [ legends, setLegends ] = useState({});
+
+  const { data: seasonRanks, status: seasonRanksStatus } = useSelector(playersSelector)
 
   useEffect(() => {
     connect()
@@ -66,27 +72,47 @@ const SeasonHistoryChart = ({id}) =>
     }
   }, [])
 
+  useEffect(() => {
+    console.log(playerStatus);
+    if (playerStatus == "ready")
+    {
+      setLegends(Object.assign({}, ...players.map((p) => ({[p.id]: p.name}))));
+    }
+  }, [playerStatus])
 
-  return <Line options={options} data={getData(seasonRanks)}></Line>
+  useEffect(() => {
+    console.log("ranks", seasonRanksStatus);
+    if (seasonRanksStatus == "ready")
+    {
+      let data = getData(seasonRanks, legends);
+      console.log(data);
+      setGraphData(data)
+    }
+  }, [legends, seasonRanksStatus])
+
+  return graphData ? <Line options={options} data={graphData}></Line> : <></>
 }
 
 const colors = [
-  "rgba(255, 255, 0, 0.5)",
-  "rgba(255, 0, 0, 0.5)",
-  "rgba(0, 255, 0, 0.5)",
-  "rgba(0, 255, 255, 0.5)",
-  "rgba(127, 255, 0, 0.5)",
-  "rgba(0, 127, 255, 0.5)"
+  "#A7D2CB",
+  "#AAC4FF",
+  "#ECC5FB",
+  "#F2D388",
+  "#FFB3B3",
+  "#99C4C8",
+  "#D0C9C0",
+  "#FAFDD6"
 ]
 
-const getData = (players) => {
-  const labels = Object.keys(players.rankhistory);
+const getData = (players, legends) => {
+  const pids = Object.keys(players.rankhistory);
   var coloridx = 0;
+  console.log(legends);
   const datasets = 
-  labels.map((pid) => {
+  pids.map((pid) => {
     const color = colors[coloridx++ % colors.length];
     const dataset = {
-      label: pid,
+      label: legends[pid],
       borderColor: color,
       data: players.rankhistory[pid].map((r) => ({ 
         x: new Date(r.timestamp),
@@ -96,6 +122,7 @@ const getData = (players) => {
     return dataset;
   });
 
+  console.log(datasets);
   return {
     labels: [],
     datasets
