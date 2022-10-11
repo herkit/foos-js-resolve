@@ -9,6 +9,7 @@ import { Modal } from 'react-bootstrap'
 import { Navigate } from 'react-router'
 import LoggedInContent from './LoggedInContent'
 import Moment from 'react-moment'
+import SeasonHistoryChart from './SeasonHistoryChart'
 
 const byRankDesc = (a,b) => (b.rank - a.rank)
 const byWinStreak = (a,b) => (b.longestWinStreak - a.longestWinStreak)
@@ -90,6 +91,7 @@ const SeasonView = ({ id }) => {
         </tbody>
       </table>
     </div>
+    <SeasonHistoryChart id={id}></SeasonHistoryChart>
 
     <LoggedInContent>
       <button className="btn btn-primary my-2" onClick={() => setShowCreateMatch(true)}>New Match</button>

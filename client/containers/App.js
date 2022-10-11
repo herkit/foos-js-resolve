@@ -7,6 +7,30 @@ import { Link } from 'react-router-dom'
 import LoggedInContent from '../components/LoggedInContent'
 import { LoginInfo } from '../components/LoginInfo'
 
+import {
+  Chart as ChartJS,
+  LineController,
+  LineElement,
+  PointElement,
+  TimeScale,
+  Title,
+  Tooltip,
+  Legend,
+  LinearScale,
+} from 'chart.js';
+import 'chartjs-adapter-moment';
+
+ChartJS.register(
+  LineController,
+  TimeScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
+
 const App = () => {
   const staticResolver = useStaticResolver()
   const bootstrapLink = {
