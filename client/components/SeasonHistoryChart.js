@@ -13,23 +13,15 @@ import {
   Legend,
 } from 'chart.js';
 
-const plugin = {
-  id: 'custom_canvas_background_color',
-  beforeDraw: (chart) => {
-    const {ctx} = chart;
-    ctx.save();
-    ctx.globalCompositeOperation = 'destination-over';
-    ctx.fillStyle = 'lightGreen';
-    ctx.fillRect(0, 0, chart.width, chart.height);
-    ctx.restore();
-  }
-};
-
 export const options = {
   responsive: true,
-  plugins: [
-    plugin
-  ],
+  plugins: {
+    legend: {
+      labels: {
+        color: '#FFFFFF'
+      }
+    }
+  },
   scales: {
     x: {
       type: 'time',
@@ -42,7 +34,7 @@ export const options = {
       },
       grid: {
         borderColor: '#FFFFFF',
-        color: '#839496',
+        color: '#83949630',
       }
     },
     y: {
@@ -52,7 +44,7 @@ export const options = {
       },
       grid: {
         borderColor: '#FFFFFF',
-        color: '#839496',
+        color: '#83949630',
       }
     }
   }
@@ -65,7 +57,7 @@ const SeasonHistoryChart = ({id}) =>
     aggregateIds: [id],
   });
 
-  const { data: players, playersStatus } = useSelector(playersSelector)
+  const { data: seasonRanks, seasonRanksStatus } = useSelector(playersSelector)
 
   useEffect(() => {
     connect()
@@ -75,23 +67,34 @@ const SeasonHistoryChart = ({id}) =>
   }, [])
 
 
-  return <Line options={options} data={getData(players)}></Line>
+  return <Line options={options} data={getData(seasonRanks)}></Line>
 }
+
+const colors = [
+  "rgba(255, 255, 0, 0.5)",
+  "rgba(255, 0, 0, 0.5)",
+  "rgba(0, 255, 0, 0.5)",
+  "rgba(0, 255, 255, 0.5)",
+  "rgba(127, 255, 0, 0.5)",
+  "rgba(0, 127, 255, 0.5)"
+]
 
 const getData = (players) => {
   const labels = Object.keys(players.rankhistory);
+  var coloridx = 0;
   const datasets = 
-  labels.map((pid) => 
-  (
-    {
+  labels.map((pid) => {
+    const color = colors[coloridx++ % colors.length];
+    const dataset = {
       label: pid,
-      borderColor: "#FFFF00",
+      borderColor: color,
       data: players.rankhistory[pid].map((r) => ({ 
         x: new Date(r.timestamp),
         y: r.rank
       }))
-    }
-  ));
+    };
+    return dataset;
+  });
 
   return {
     labels: [],
