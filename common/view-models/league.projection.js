@@ -10,6 +10,7 @@ export default {
   [SEASON_STARTED]: (state, { payload: { seasonid } }) => ({
     ...state,
     currentSeason: seasonid,
-    seasons: [...state.seasons, seasonid]
+    seasonCount: (state.seasonCount ?? 0) + 1,
+    seasons: [...state.seasons, { name: "Season " + ((state.seasonCount ?? 0) + 1), id: seasonid }]
   })
 };

@@ -41,7 +41,7 @@ const PlayerSelect = ({player, onSelected, unselectedText, variant}) => {
 
   useEffect(() => {
     if (showSelect)
-      selectPlayerTimeout = setTimeout(() => setShowSelect(false), 5000)
+      selectPlayerTimeout = setTimeout(() => setShowSelect(false), 10000)
 
     return () => {
       if (selectPlayerTimeout)

@@ -24,6 +24,11 @@ export const options = {
       }
     }
   },
+  datasets: {
+    line: {
+      tension: 0.33
+    }
+  },
   scales: {
     x: {
       type: 'time',
@@ -42,7 +47,7 @@ export const options = {
     y: {
       title: {
         display: true,
-        text: 'value'
+        text: 'Rank'
       },
       grid: {
         borderColor: '#FFFFFF',
@@ -52,7 +57,7 @@ export const options = {
   }
 };
 
-const SeasonHistoryChart = ({id}) => 
+const SeasonHistoryChart = ({id, selected}) => 
 {
   const {connect, dispose, selector: playersSelector} = useReduxViewModel({
     name: "SeasonRanks", 
@@ -84,13 +89,13 @@ const SeasonHistoryChart = ({id}) =>
     console.log("ranks", seasonRanksStatus);
     if (seasonRanksStatus == "ready")
     {
-      let data = getData(seasonRanks, legends);
+      let data = getData(seasonRanks, legends, selected);
       console.log(data);
       setGraphData(data)
     }
-  }, [legends, seasonRanksStatus])
+  }, [legends, seasonRanks, seasonRanksStatus])
 
-  return graphData ? <Line options={options} data={graphData}></Line> : <></>
+  return graphData ? <div className="mw-lg-50"><Line options={options} data={graphData}></Line></div> : <></>
 }
 
 const colors = [
@@ -104,16 +109,19 @@ const colors = [
   "#FAFDD6"
 ]
 
-const getData = (players, legends) => {
-  const pids = Object.keys(players.rankhistory);
+const getData = (players, legends, selected) => {
+  const top5 = players.ranks.slice(0, 5).map((r) => r.id);
+  console.log(top5);
+
+  const pids = selected?.length > 0 ? selected : top5;
   var coloridx = 0;
-  console.log(legends);
   const datasets = 
   pids.map((pid) => {
     const color = colors[coloridx++ % colors.length];
     const dataset = {
       label: legends[pid],
       borderColor: color,
+      backgroundColor: color + "90",
       data: players.rankhistory[pid].map((r) => ({ 
         x: new Date(r.timestamp),
         y: r.rank

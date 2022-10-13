@@ -15,6 +15,8 @@ const byRankDesc = (a,b) => (b.rank - a.rank)
 const byWinStreak = (a,b) => (b.longestWinStreak - a.longestWinStreak)
 const byLossStreak = (a,b) => (b.longestLossStreak - a.longestLossStreak)
 
+const showTicker = false;
+
 const NoRenderContainer = ({children}) => {
   return (children);
 }
@@ -70,28 +72,61 @@ const SeasonView = ({ id }) => {
     {(() => { if (players?.records?.winStreak) { return <div className="w-50 pe-2" style={{maxWidth: "350px"}}><RecordCard record={players.records.winStreak} /></div> }})()}
     {(() => { if (players?.records?.lossStreak) { return <div className="w-50 ps-2" style={{maxWidth: "350px"}}><RecordCard record={players.records.lossStreak} /></div> }})()}
     </div>
-    <div className='my-2'>
-      <table className="table my-0">
-        <thead>
-          <tr className="h5">
-            <th className='text-start'>Player</th>
-            <th className='text-center d-none d-md-table-cell'>Played</th>
-            <th className='text-center d-none d-sm-table-cell'><span className="d-none d-md-inline">Win/loss ratio</span><span className="d-inline d-md-none">W/L</span></th>
-            <th className='text-end'>Rank</th>
-          </tr>
-        </thead>
-        <tbody>
-          {players?.ranks?.map((player, idx) => (
-          <tr key={player.id} className={ classesByRank(idx) }>
-            <td className='text-start'><PlayerName playerid={player.id}></PlayerName></td>
-            <td className='text-center d-none d-md-table-cell'>{player.played}</td>
-            <td className='text-center d-none d-sm-table-cell'>{player.lossCount > 0 ? (player.winCount / player.lossCount).toFixed(2) : "No loss"}</td>
-            <td className='text-end'>{player.rank}</td>
-          </tr>))}
-        </tbody>
-      </table>
+    <div className='row'>
+      <div className="col">
+        <h2 className="h4">Latest matches</h2>
+        <table className='table'>
+          <thead>
+            <tr className="h5">
+              <th className='text-start'>When</th>
+              <th className='text-center d-none d-md-table-cell'>Winner(s)</th>
+              <th className='text-end'>Loser(s)</th>
+            </tr>
+          </thead>        
+          <tbody>
+            {players?.recentMatches?.map((match, idx) => (
+            <tr key={match.timestamp}>
+              <td className='d-table-cell'><Moment date={new Date(match.timestamp)} className='text-light' fromNowDuring={millisecondsSinceMidnight()} format='ll[:]'></Moment></td>
+              <td className='d-table-cell'>{match.winners.map((id, idx) => (
+                <NoRenderContainer key={idx}>
+                  {idx > 0 ? <span>&nbsp;and&nbsp;</span> : null}
+                  <PlayerName playerid={id} />
+                </NoRenderContainer>))}</td>
+              <td className='d-table-cell'>
+                {match.losers.map((id, idx) => (
+                  <>
+                    {idx > 0 ? <span>&nbsp;and&nbsp;</span> : null}
+                    <PlayerName playerid={id}/>
+                  </>
+                ))}
+              </td>
+            </tr>
+            ))}
+          </tbody>
+        </table>
+        <SeasonHistoryChart id={id}></SeasonHistoryChart>
+      </div>
+      <div className="col">
+        <h2 className="h4">Scoreboard</h2>
+        <table className="table">
+          <thead>
+            <tr className="h5">
+              <th className='text-start'>Player</th>
+              <th className='text-center d-none d-sm-table-cell'><span className="d-none d-md-inline">Win/loss ratio</span><span className="d-inline d-md-none">W/L</span></th>
+              <th className='text-end'>Rank</th>
+            </tr>
+          </thead>
+          <tbody>
+            {players?.ranks?.map((player, idx) => (
+            <tr key={player.id} className={ classesByRank(idx) }>
+              <td className='text-start'><PlayerName playerid={player.id}></PlayerName></td>
+              <td className='text-center d-none d-sm-table-cell'>{player.lossCount > 0 ? (player.winCount / player.lossCount).toFixed(2) : "No loss"}</td>
+              <td className='text-end'>{player.rank}</td>
+            </tr>))}
+          </tbody>
+        </table>
+      </div>
     </div>
-    <SeasonHistoryChart id={id}></SeasonHistoryChart>
 
     <LoggedInContent>
       <button className="btn btn-primary my-2" onClick={() => setShowCreateMatch(true)}>New Match</button>
@@ -104,7 +139,8 @@ const SeasonView = ({ id }) => {
         </Modal.Body>
       </Modal>
     </LoggedInContent>
-
+    
+    {showTicker ? 
     <div className='d-none d-lg-inline my-2'>
       <div className="ticker-wrap bg-dark">
         <div className="ticker">
@@ -126,6 +162,7 @@ const SeasonView = ({ id }) => {
         </div>
       </div>
     </div>
+    : <></>}
   </div>)
 }
 
