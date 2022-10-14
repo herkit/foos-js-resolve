@@ -72,41 +72,8 @@ const SeasonView = ({ id }) => {
     {(() => { if (players?.records?.winStreak) { return <div className="w-50 pe-2" style={{maxWidth: "350px"}}><RecordCard record={players.records.winStreak} /></div> }})()}
     {(() => { if (players?.records?.lossStreak) { return <div className="w-50 ps-2" style={{maxWidth: "350px"}}><RecordCard record={players.records.lossStreak} /></div> }})()}
     </div>
-    <div className='row'>
-      <div className="col">
-        <h2 className="h4">Latest matches</h2>
-        <table className='table'>
-          <thead>
-            <tr className="h5">
-              <th className='text-start'>When</th>
-              <th className='text-center d-none d-md-table-cell'>Winner(s)</th>
-              <th className='text-end'>Loser(s)</th>
-            </tr>
-          </thead>        
-          <tbody>
-            {players?.recentMatches?.map((match, idx) => (
-            <tr key={match.timestamp}>
-              <td className='d-table-cell'><Moment date={new Date(match.timestamp)} className='text-light' fromNowDuring={millisecondsSinceMidnight()} format='ll[:]'></Moment></td>
-              <td className='d-table-cell'>{match.winners.map((id, idx) => (
-                <NoRenderContainer key={idx}>
-                  {idx > 0 ? <span>&nbsp;and&nbsp;</span> : null}
-                  <PlayerName playerid={id} />
-                </NoRenderContainer>))}</td>
-              <td className='d-table-cell'>
-                {match.losers.map((id, idx) => (
-                  <>
-                    {idx > 0 ? <span>&nbsp;and&nbsp;</span> : null}
-                    <PlayerName playerid={id}/>
-                  </>
-                ))}
-              </td>
-            </tr>
-            ))}
-          </tbody>
-        </table>
-        <SeasonHistoryChart id={id}></SeasonHistoryChart>
-      </div>
-      <div className="col">
+    <div className='d-flex flex-column flex-lg-row-reverse'>
+      <div className="ms-lg-2 w-lg-50">
         <h2 className="h4">Scoreboard</h2>
         <table className="table">
           <thead>
@@ -125,6 +92,39 @@ const SeasonView = ({ id }) => {
             </tr>))}
           </tbody>
         </table>
+      </div>
+      <div className="me-lg-2 w-lg-50">
+        <h2 className="h4">Latest matches</h2>
+        <table className='table'>
+          <thead>
+            <tr className="h5">
+              <th className='text-start'>When</th>
+              <th className='text-center d-md-table-cell'>Winner(s)</th>
+              <th className='text-end'>Loser(s)</th>
+            </tr>
+          </thead>        
+          <tbody>
+            {players?.recentMatches?.map((match, idx) => (
+            <tr key={match.timestamp}>
+              <td className='d-table-cell'><Moment date={new Date(match.timestamp)} className='text-light' fromNowDuring={millisecondsSinceMidnight()} format='ll'></Moment></td>
+              <td className='d-table-cell'>{match.winners.map((id, idx) => (
+                <NoRenderContainer key={idx}>
+                  {idx > 0 ? <span>&nbsp;and&nbsp;</span> : null}
+                  <PlayerName playerid={id} />
+                </NoRenderContainer>))}</td>
+              <td className='d-table-cell'>
+                {match.losers.map((id, idx) => (
+                  <>
+                    {idx > 0 ? <span>&nbsp;and&nbsp;</span> : null}
+                    <PlayerName playerid={id}/>
+                  </>
+                ))}
+              </td>
+            </tr>
+            ))}
+          </tbody>
+        </table>
+        <SeasonHistoryChart id={id}></SeasonHistoryChart>
       </div>
     </div>
 

@@ -54,3 +54,9 @@
   align-items: center;
   justify-content: space-between;
 }
+
+@media (min-width: 992px) {
+  .w-lg-50 {
+    width: 50% !important;
+  }
+}

@@ -17,6 +17,7 @@ import { ConfigService } from 'aws-sdk';
 
 export const options = {
   responsive: true,
+  aspectRatio: 1.5,
   plugins: {
     legend: {
       labels: {
@@ -31,7 +32,7 @@ export const options = {
   },
   scales: {
     x: {
-      type: 'time',
+      type: 'linear',
       time: {
         tooltipFormat: 'lll'
       },
@@ -95,7 +96,7 @@ const SeasonHistoryChart = ({id, selected}) =>
     }
   }, [legends, seasonRanks, seasonRanksStatus])
 
-  return graphData ? <div className="mw-lg-50"><Line options={options} data={graphData}></Line></div> : <></>
+  return graphData ? <div><Line options={options} data={graphData}></Line></div> : <></>
 }
 
 const colors = [
@@ -123,7 +124,7 @@ const getData = (players, legends, selected) => {
       borderColor: color,
       backgroundColor: color + "90",
       data: players.rankhistory[pid].map((r) => ({ 
-        x: new Date(r.timestamp),
+        x: r.matchnumber, // new Date(r.timestamp),
         y: r.rank
       }))
     };

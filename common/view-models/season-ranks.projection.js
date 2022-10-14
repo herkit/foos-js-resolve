@@ -105,8 +105,11 @@ export default {
     const lls = ranks.sort((a, b) => b.longestLossStreak - a.longestLossStreak)[0];
     const lws = ranks.sort((a, b) => b.longestWinStreak - a.longestWinStreak)[0];
 
+    const matchcount = (state.matchcount ?? 0) + 1;
+
     const stateChanges = {
       ...state,
+      matchcount,
       ranks: ranks.sort((a, b) => b.rank - a.rank),
       rankhistory: {
         ...state.rankhistory,
@@ -114,7 +117,7 @@ export default {
           ...playersState,
           [id]: [
             ...state.rankhistory[id] ?? [],
-            { timestamp, rank }
+            { timestamp, rank, matchnumber: matchcount }
           ]
         }), {})
       },
@@ -130,6 +133,7 @@ export default {
 
     return ({
       ...state,
+      ...{ matchcount: (state.matchcount ?? 0) + 1 },
       ...stateChanges
     })
   }

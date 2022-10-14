@@ -1,7 +1,7 @@
 FROM node:16.13.2-buster-slim as base
 WORKDIR /app
 VOLUME /app/node_modules
-COPY [".babelrc", "package.json", "config.*.js", "run.js", "./"]
+COPY ["yarn.lock", ".babelrc", "package.json", "config.*.js", "run.js", "./"]
 RUN ["yarn", "install"]
 
 FROM base as build

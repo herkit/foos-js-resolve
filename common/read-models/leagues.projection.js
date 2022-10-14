@@ -31,8 +31,6 @@ const readModel = {
       exists = await slugExists(store, slug)
     }
 
-    //console.log("slug", slug)
-
     await store.update(
       'Leagues',
       { id: aggregateId },
