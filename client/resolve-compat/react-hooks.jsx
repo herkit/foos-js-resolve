@@ -34,15 +34,45 @@ export const useQuery = (query, callback) => {
 
 /**
  * useViewModel(name, aggregateIds, onState) -> { connect, dispose }.
- * Non-reactive view-models (LeagueData, PlayerSettings, PlayerName): fetch once
- * on connect. The reactive SeasonRanks path lives in the redux shim.
+ *
+ * reSolve view-models were live. These (LeagueData, PlayerSettings, PlayerName)
+ * are eventually consistent — e.g. after creating a league its first season is
+ * produced asynchronously by the LeagueCreation saga a moment later. So we poll
+ * and push a new state only when it actually changes (avoids re-render churn),
+ * which restores the reactive feel without a dedicated WebSocket per model.
  */
+const VIEW_MODEL_POLL_MS = 3000
+
 export const useViewModel = (name, aggregateIds, onState) => {
-  const connect = async () => {
-    const state = await fetchViewModel(name, aggregateIds[0])
-    if (onState) onState(state)
+  let timer = null
+  let lastSerialized
+
+  const poll = async () => {
+    try {
+      const state = await fetchViewModel(name, aggregateIds[0])
+      const serialized = JSON.stringify(state)
+      if (serialized !== lastSerialized) {
+        lastSerialized = serialized
+        if (onState) onState(state)
+      }
+    } catch (e) {
+      // transient; the next tick retries
+    }
   }
-  return { connect, dispose: () => {} }
+
+  const connect = () => {
+    void poll()
+    timer = setInterval(poll, VIEW_MODEL_POLL_MS)
+  }
+
+  const dispose = () => {
+    if (timer) {
+      clearInterval(timer)
+      timer = null
+    }
+  }
+
+  return { connect, dispose }
 }
 
 /** Static assets are served from the site root, so the path passes through. */

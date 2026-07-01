@@ -5,6 +5,7 @@ import {
   type OnModuleDestroy,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
+import { IllegalStateError } from '@event-driven-io/emmett';
 import {
   postgreSQLEventStoreConsumer,
   postgreSQLReactor,
@@ -70,24 +71,39 @@ export class LeagueCreationSaga
           },
           eachMessage: async (message) => {
             const streamName = message.metadata.streamName;
-            if (message.type === 'LEAGUE_CREATED') {
-              const leagueId = idFromStream(streamName, 'league-');
-              const seasonId = randomUUID();
-              await this.seasons.createSeason(seasonId, {
-                leagueid: leagueId,
-                rating: message.data.rating,
-              });
-              this.logger.log(
-                `LEAGUE_CREATED(${leagueId}) -> createSeason(${seasonId})`,
-              );
-            } else if (message.type === 'SEASON_CREATED') {
-              const seasonId = idFromStream(streamName, 'season-');
-              await this.leagues.startSeason(message.data.leagueid, {
-                seasonid: seasonId,
-              });
-              this.logger.log(
-                `SEASON_CREATED(${seasonId}) -> startSeason(league ${message.data.leagueid})`,
-              );
+            try {
+              if (message.type === 'LEAGUE_CREATED') {
+                const leagueId = idFromStream(streamName, 'league-');
+                const seasonId = randomUUID();
+                await this.seasons.createSeason(seasonId, {
+                  leagueid: leagueId,
+                  rating: message.data.rating,
+                });
+                this.logger.log(
+                  `LEAGUE_CREATED(${leagueId}) -> createSeason(${seasonId})`,
+                );
+              } else if (message.type === 'SEASON_CREATED') {
+                const seasonId = idFromStream(streamName, 'season-');
+                await this.leagues.startSeason(message.data.leagueid, {
+                  seasonid: seasonId,
+                });
+                this.logger.log(
+                  `SEASON_CREATED(${seasonId}) -> startSeason(league ${message.data.leagueid})`,
+                );
+              }
+            } catch (error) {
+              // The reactor has at-least-once delivery, so a reaction may be
+              // replayed (e.g. after a restart before the checkpoint advanced).
+              // Domain conflicts mean the effect was already applied — treat as
+              // a no-op so the processor advances instead of halting. Anything
+              // else is likely transient, so rethrow to let it retry.
+              if (error instanceof IllegalStateError) {
+                this.logger.debug(
+                  `Skipping already-applied reaction for ${message.type}: ${error.message}`,
+                );
+                return;
+              }
+              throw error;
             }
           },
         }),
