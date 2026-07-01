@@ -252,6 +252,25 @@ Stream naming convention: `streamId = \`${aggregateName}-${aggregateId}\``.
   - Slack strategy env is read at module-eval time; set the vars as real environment
     variables (not only `.env`) to enable the routes.
 
-- **Next: Phase 4** — data migration: inspect `./mysql/Dump20260701/`, build the exporter
-  (reSolve MySQL events → Emmett streams), replay to rebuild read/view models, apply the
-  `PLAYER_EMAIL_CHANGED` fix-up.
+- **Phase 4 — COMPLETE.** Data migration built and verified with exact parity against the
+  production dump (`./mysql/Dump20260701/`, 2939 events):
+  - **Exporter** (`nestjs/foos/migrate/`, run via ts-node — see `migrate/README.md`):
+    reads the reSolve `events` table, maps each event `type` → aggregate/stream id
+    (`stream-mapping.ts`), copies the payload verbatim, and appends to a fresh Emmett
+    store. Because the store is created with the read-model projections **inline**, the
+    replay rebuilds all read models; the saga is not started.
+  - **Critical fix found during verification:** replay must be in **chronological order**
+    (`timestamp`), NOT `(threadId, threadCounter)` — those are reSolve partition
+    coordinates and don't reflect cross-aggregate order. Wrong order made 14
+    `PLAYER_DELETED` events no-op (players 65 vs 51) and mis-assigned superuser.
+  - Transforms: `PLAYER_DELETED` payload `null` → `{}`; `SEASON_MATCH_REGISTERED` carries
+    the row `timestamp` into `data.timestamp`.
+  - The `PLAYER_EMAIL_CHANGED` collision fix-up is a **no-op** for this dump — no
+    email-change, single/double-match, or won/lost-match events were ever emitted (prod
+    recorded matches only via `SEASON_MATCH_REGISTERED` on the season stream).
+  - **Verified parity** (migrated vs original read-model): events 2939=2939,
+    players 51=51, leagues 5=5, superuser 1=1 (Henrik Grotle). Migrated into the
+    `foos_migrated` database.
+
+- **Next: Phase 5** — frontend cutover: swap `@resolve-js/react-hooks` / `@resolve-js/redux`
+  for thin hooks against the new REST + WebSocket API; serve the built SPA from Nest.
