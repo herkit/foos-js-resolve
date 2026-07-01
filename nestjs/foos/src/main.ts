@@ -12,6 +12,9 @@ import { EmmettExceptionFilter } from './common/emmett-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  // API lives under /api so it doesn't clash with SPA routes (/players, /leagues).
+  // The WebSocket gateway (socket.io) is unaffected by the HTTP prefix.
+  app.setGlobalPrefix('api');
   // The kept React SPA is served from a different origin during development.
   app.enableCors({ origin: true, credentials: true });
   app.use(cookieParser());

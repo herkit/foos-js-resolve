@@ -272,5 +272,41 @@ Stream naming convention: `streamId = \`${aggregateName}-${aggregateId}\``.
     players 51=51, leagues 5=5, superuser 1=1 (Henrik Grotle). Migrated into the
     `foos_migrated` database.
 
-- **Next: Phase 5** — frontend cutover: swap `@resolve-js/react-hooks` / `@resolve-js/redux`
-  for thin hooks against the new REST + WebSocket API; serve the built SPA from Nest.
+- **Phase 5 — COMPLETE (build + serving verified; browser QA pending).** Frontend cut over
+  from the reSolve client SDK via a **compatibility shim**, built with **Vite**, served by Nest.
+  - **API client** (`client/api/`): REST client + endpoint map (command/query/view-model →
+    NestJS routes) under the `/api` prefix; cookie-credentialed.
+  - **Redux store** (`client/store/`): plain redux with `jwt` + `readModels` + `viewModels`
+    slices (replaces `createResolveStore`).
+  - **Shim** (`client/resolve-compat/`): reimplements `@resolve-js/react-hooks`
+    (`useQuery`/`useCommand`/`useViewModel`/`useStaticResolver`/`useClient`) and
+    `@resolve-js/redux` (`useReduxReadModel`/`useReduxReadModelSelector`/`useReduxViewModel`/
+    `createResolveStore`/`ResolveReduxProvider`/`internal`) against the new API. SeasonRanks is
+    live over socket.io; other view-models fetch-on-connect.
+  - **Vite** (`vite.config.mjs`) **aliases the two reSolve packages to the shim**, so component
+    imports are unchanged. esbuild `jsx` loader handles the JSX-in-`.js` sources. Dev proxy
+    forwards `/api` + `/socket.io` to the API. Build → `nestjs/foos/client-dist` (gitignored).
+  - **Bootstrap**: `index.html` + `client/main.jsx` (react-dom render + redux Provider +
+    BrowserRouter), replacing the reSolve SSR entry. `AuthForm`/`LoginInfo` now use `fetch`
+    against `/api/auth/*` instead of native form POSTs.
+  - **Nest**: global `/api` prefix (WS gateway unaffected) + `ServeStaticModule` serving the
+    SPA with `/api` excluded from the SPA fallback.
+  - **Verified:** `vite build` (472 modules) succeeds — the shim compiles against every
+    component; served app returns the SPA at `/`, falls back to index.html for client routes
+    (`/leagues`, `/players`), serves hashed assets + `static/` files, all `/api/*` endpoints
+    respond, and the socket.io handshake works.
+  - **Not yet verified:** in-browser React runtime (rendering, hook data flow, live scoreboard)
+    — needs a real browser (Phase 6 E2E).
+
+  Notes/decisions:
+  - Frontend build deps (`vite`, `@vitejs/plugin-react`, `socket.io-client`, `jwt-decode`)
+    were added to the **root** `package.json` and installed with `--ignore-scripts` to avoid
+    rebuilding reSolve's native `better-sqlite3` (which fails under node-gyp here). The root
+    `package-lock.json` may be out of sync as a result; a clean environment should
+    `npm install` without the reSolve native deps.
+  - Removed a dead `import { ConfigService } from 'aws-sdk'` in `SeasonHistoryChart` that would
+    have bloated/broken the browser bundle.
+  - reSolve SSR is dropped (client-side rendering only), as decided.
+
+- **Next: Phase 6** — parity test & cutover: E2E in a browser (create player, register match,
+  live scoreboard), run against the migrated data, then production cutover.

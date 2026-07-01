@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { EventStoreModule } from './event-store/event-store.module';
@@ -15,6 +17,12 @@ import { AuthModule } from './auth/auth.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    // Serve the built SPA (vite build -> client-dist). API is under /api and is
+    // excluded from the SPA fallback so it isn't shadowed by index.html.
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'client-dist'),
+      exclude: ['/api/{*path}'],
+    }),
     PongoModule,
     EventStoreModule,
     SeasonModule,

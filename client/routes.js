@@ -29,14 +29,14 @@ const AppRoutes = () => {
         <Route path="login" element={<Login />} />
         <Route path="register" element={<AuthForm
             buttonText="Create account"
-            action={`/api/register${location.search}`}
+            endpoint="register"
             title="Create account"
           />}/>
       </Route>
       <Route path="/" element={<App />}>
         <Route path="error" element={<Error />} />
         <Route path="leagues" element={<LeagueSelect />} />
-        <Route path="leagues/create" element={<LoggedInContent message="Log in to create a league"><LeagueCreate onCreateSuccess={() => setRefresh(refresh + 1)}></LeagueCreate></LoggedInContent>} />
+        <Route path="leagues/create" element={<LoggedInContent message="Log in to create a league"><LeagueCreate onCreateSuccess={() => window.location.assign('/leagues')}></LeagueCreate></LoggedInContent>} />
         <Route path="leagues/:slug" element={<LeagueBySlug />} />
         <Route path="players" element={<PlayerList />}>
           <Route path="create" element={

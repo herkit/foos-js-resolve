@@ -1,8 +1,8 @@
 import React from "react";
-import { Form } from "react-bootstrap";
 import Gravatar from "react-gravatar";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { apiPost } from "../api/client";
 
 const Avatar = ({me}) => {
   if (me.avatar)
@@ -16,20 +16,22 @@ const LoginInfo = () => {
 
   const isLoggedIn = (me === null || me === void 0 ? void 0 : me.id)
 
+  const onLogout = async (e) => {
+    e.preventDefault()
+    try {
+      await apiPost('/auth/logout')
+    } catch (err) {
+      // ignore; navigate away regardless
+    }
+    window.location.assign('/')
+  }
+
   if (isLoggedIn)
     return (
       <div>
         <span className="me-2 d-lg-inline d-none">{me.name}</span>
         <Avatar me={me}></Avatar>
-        <Link 
-          to="/" 
-          className="btn btn-warning me-2" 
-          onClick={() =>document.getElementById('hidden-form-for-logout').submit()}
-        >Logout</Link>
-        <Form method="post" id="hidden-form-for-logout" action="/api/logout">
-            <input type="hidden" name="username" value="null" />
-            <input type="hidden" />
-        </Form>
+        <Link to="/" className="btn btn-warning me-2" onClick={onLogout}>Logout</Link>
       </div>
     )
   else
