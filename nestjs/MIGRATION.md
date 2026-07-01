@@ -123,6 +123,9 @@ Stream naming convention: `streamId = \`${aggregateName}-${aggregateId}\``.
   equivalent to `auth/`.
 
 ### Phase 4 — Data migration
+- **Source dump:** a production MySQL event-store dump is available locally at
+  `./mysql/Dump20260701/` (gitignored — contains prod data). Use it to derive the real
+  event-table schema and to build/test the exporter.
 - Inspect the real reSolve MySQL event table schema; write an exporter → transform to
   Emmett stream format (`streamId`, `type`, `data=payload`, `metadata.timestamp`, version)
   → load preserving order/timestamps → apply the `PLAYER_EMAIL_CHANGED` fix-up → replay
