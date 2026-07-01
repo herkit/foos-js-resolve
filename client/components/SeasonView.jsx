@@ -8,7 +8,7 @@ import { Helmet } from 'react-helmet'
 import { Modal } from 'react-bootstrap'
 import { Navigate } from 'react-router'
 import LoggedInContent from './LoggedInContent'
-import Moment from 'react-moment'
+import Moment from './DateText'
 import SeasonHistoryChart from './SeasonHistoryChart'
 
 const byRankDesc = (a,b) => (b.rank - a.rank)
