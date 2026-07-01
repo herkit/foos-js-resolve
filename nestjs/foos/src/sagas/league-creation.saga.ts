@@ -53,6 +53,21 @@ export class LeagueCreationSaga
         postgreSQLReactor<SagaMessage>({
           processorId: 'league-creation-saga',
           canHandle: ['LEAGUE_CREATED', 'SEASON_CREATED'],
+          // The processor lock is leased. After a hard kill (SIGKILL) the dead
+          // process's lease lingers, so a restart can't acquire it. A short
+          // lease timeout lets a restart treat the dead holder's lock as stale
+          // and steal it, and retry rides out the remaining lease window — so
+          // dev restarts self-heal without a Postgres restart. (A clean Ctrl+C
+          // shutdown releases the lock immediately via onModuleDestroy.)
+          lock: {
+            timeoutSeconds: 10,
+            acquisitionPolicy: {
+              type: 'retry',
+              retries: 15,
+              minTimeout: 1000,
+              maxTimeout: 2000,
+            },
+          },
           eachMessage: async (message) => {
             const streamName = message.metadata.streamName;
             if (message.type === 'LEAGUE_CREATED') {

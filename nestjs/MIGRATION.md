@@ -191,8 +191,10 @@ Stream naming convention: `streamId = \`${aggregateName}-${aggregateId}\``.
   - BigInt JSON shim in `main.ts` (Emmett stream versions are BigInt; Express can't
     serialize them).
   - `app.enableShutdownHooks()` so the saga consumer releases its processor lock on
-    SIGTERM/SIGINT. Hard `taskkill /F` (SIGKILL) leaves a stale lock until Postgres reaps
-    the connection — dev workaround: `docker restart foos-postgres-1`.
+    SIGTERM/SIGINT. The saga reactor also uses a leased lock (`lock.timeoutSeconds: 10` +
+    `retry` acquisition policy), so after a hard `taskkill /F` (SIGKILL) a restart steals the
+    dead holder's stale lease and self-heals — no Postgres restart needed. (Added when a
+    "Failed to acquire lock for processor 'league-creation-saga'" error surfaced on restart.)
 
 - **Phase 2 — COMPLETE.** Read side implemented and verified against real Postgres:
   - **Read-model projections** (`src/read-models/*.projection.ts`) registered **inline**
