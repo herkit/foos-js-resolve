@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { PongoClient } from '@event-driven-io/pongo';
 import { PONGO } from './pongo';
+import { hashPassword } from '../common/password';
 import type { PlayerDoc, PlayerMatchesDoc } from './read-model.types';
 
 /** Public player shape (id, no password). */
@@ -63,6 +64,16 @@ export class PlayersQueryService {
   /** Internal: full document incl. password hash (for auth/email-change checks). */
   byEmailRaw(email: string): Promise<PlayerDoc | null> {
     return this.players.findOne({ email });
+  }
+
+  /** Login resolver — matches email + hashed password (ports `Players.login`). */
+  async login(email: string, password: string): Promise<PlayerView | null> {
+    if (!email || !password) return null;
+    const doc = await this.players.findOne({
+      email,
+      password: hashPassword(password),
+    });
+    return doc ? toView(doc) : null;
   }
 
   autocomplete(): Promise<PlayerView[]> {

@@ -1,5 +1,14 @@
-import { Body, Controller, Delete, Param, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { CurrentActor, type Actor } from '../common/actor';
+import { JwtCookieGuard } from '../auth/jwt-cookie.guard';
 import { PlayerService } from './player.service';
 
 interface CreatePlayerBody {
@@ -24,6 +33,7 @@ export class PlayerController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtCookieGuard)
   remove(@Param('id') id: string, @CurrentActor() actor: Actor) {
     return this.players.deletePlayer(id, actor);
   }

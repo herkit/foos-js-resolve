@@ -1,5 +1,6 @@
-import { Body, Controller, Param, Post } from '@nestjs/common';
+import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
 import { CurrentActor, type Actor } from '../common/actor';
+import { JwtCookieGuard } from '../auth/jwt-cookie.guard';
 import { LeagueService } from './league.service';
 
 @Controller('leagues')
@@ -7,6 +8,7 @@ export class LeagueController {
   constructor(private readonly leagues: LeagueService) {}
 
   @Post(':id')
+  @UseGuards(JwtCookieGuard)
   create(
     @Param('id') id: string,
     @Body() body: { name: string; rating?: string },

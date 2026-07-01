@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { EmmettExceptionFilter } from './common/emmett-exception.filter';
 
@@ -13,6 +14,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   // The kept React SPA is served from a different origin during development.
   app.enableCors({ origin: true, credentials: true });
+  app.use(cookieParser());
   app.useGlobalFilters(new EmmettExceptionFilter());
   // Ensures onModuleDestroy runs on SIGINT/SIGTERM so the saga consumer
   // releases its processor lock cleanly on shutdown.

@@ -10,6 +10,7 @@ import { MatchModule } from './match/match.module';
 import { LeagueModule } from './league/league.module';
 import { LeagueCreationModule } from './sagas/league-creation.module';
 import { ReadModelsModule } from './read-models/read-models.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ReadModelsModule } from './read-models/read-models.module';
     LeagueModule,
     LeagueCreationModule,
     ReadModelsModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

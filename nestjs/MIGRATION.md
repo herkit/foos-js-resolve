@@ -226,6 +226,32 @@ Stream naming convention: `streamId = \`${aggregateName}-${aggregateId}\``.
     registration — historical events need a rebuild (Phase 4 territory).
   - `login` resolver deferred to **Phase 3** (auth); `byEmailRaw` exists to support it.
 
-- **Next: Phase 3** — auth: `@nestjs/passport` local + Slack strategies, JWT cookie guard
-  populating `request.user` (replacing the dev-header `@CurrentActor` stand-in), and the
-  `login` query.
+- **Phase 3 — COMPLETE.** Auth ported and verified against real Postgres:
+  - **JWT cookie** (`src/auth/`): stateless `signToken`/`verifyToken` (`jsonwebtoken`),
+    httpOnly `jwt` cookie (name/maxAge from the original config), `cookie-parser` wired.
+  - **`JwtCookieGuard`** verifies the cookie and populates `request.user`; `@CurrentActor`
+    now reads it (the dev-header stand-in from phases 1-2 is gone). Guard is dependency-free
+    so it drops onto any controller without module coupling. Applied to
+    `POST /leagues/:id` and `DELETE /players/:id`.
+  - **Local auth** (`AuthController`): `POST /auth/register` (email check → createPlayer →
+    token), `POST /auth/login` (ports the `Players.login` resolver — added to
+    `PlayersQueryService`), `POST /auth/logout`, `GET /auth/me`.
+  - **Slack OAuth** (`SlackController`/`SlackStrategy` via `passport-slack-oauth2`) ported
+    and wired **only when `SLACK_CLIENT_ID`/`SLACK_CLIENT_SECRET` are set** (logs "disabled"
+    otherwise). Not exercised locally — needs real Slack credentials.
+  - **Verified:** register/login set the cookie; `/auth/me` returns claims; wrong password
+    401; logout clears the session; `POST /leagues` is 401 without a cookie and stamps
+    `owner` from the JWT; `DELETE /players` enforces self/superuser (403 for others,
+    200 for self).
+
+  Notes/decisions:
+  - Used `jsonwebtoken` + a stateless guard instead of `@nestjs/jwt`/`passport-jwt` — avoids
+    a circular module dependency (AuthModule needs PlayerModule; guarded controllers would
+    otherwise need AuthModule) and keeps the guard usable anywhere.
+  - `superuser` claim is read from the (inline) Players read-model at register/login time.
+  - Slack strategy env is read at module-eval time; set the vars as real environment
+    variables (not only `.env`) to enable the routes.
+
+- **Next: Phase 4** — data migration: inspect `./mysql/Dump20260701/`, build the exporter
+  (reSolve MySQL events → Emmett streams), replay to rebuild read/view models, apply the
+  `PLAYER_EMAIL_CHANGED` fix-up.
