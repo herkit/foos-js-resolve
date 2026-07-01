@@ -194,7 +194,38 @@ Stream naming convention: `streamId = \`${aggregateName}-${aggregateId}\``.
     SIGTERM/SIGINT. Hard `taskkill /F` (SIGKILL) leaves a stale lock until Postgres reaps
     the connection — dev workaround: `docker restart foos-postgres-1`.
 
-- **Next: Phase 2** — read-models (`Players`, `Leagues`) as async Pongo projections +
-  query resolvers/controllers; remaining view-models (`PlayerMatches`, `PlayerName`,
-  `PlayerSettings`, `LeagueData`) as WS subscriptions/REST; port `emailChange` handler
-  to call `PlayerService.changeEmail`.
+- **Phase 2 — COMPLETE.** Read side implemented and verified against real Postgres:
+  - **Read-model projections** (`src/read-models/*.projection.ts`) registered **inline**
+    with the event store (`projections.inline([...])`), using free-hand `pongoProjection`
+    (needed because they query the collection):
+    - **Players** — folds `PLAYER_*` events; "first user is superuser" (global count),
+      current rank, and consolidates the `PlayerName`/`PlayerSettings` view-models
+      (name + default league) into the player document.
+    - **Leagues** — slug generation with uniqueness; restored the (originally
+      commented-out) `SEASON_STARTED` handler to fold in the `LeagueData` season list.
+    - **PlayerMatches** — multi-stream projection into `player_matches` keyed by player.
+  - **Query side** (`PongoModule` client + `*.query.service.ts` + `*.read.controller.ts`):
+    `GET /players` (all/names/autocomplete/by-email/:id/:id/matches),
+    `GET /leagues` (all/by-slug/:id). Responses expose `id` (not `_id`) and omit the
+    password hash.
+  - **emailChange** (`email-change.controller.ts`) ported from `api/emailChange.js`:
+    read (is email taken?) + `changeEmail` command → 409 on conflict.
+  - **Verified:** read-models populate from commands; superuser-first flag; slug +
+    saga-driven season list on leagues; player match lists; emailChange 409/201.
+
+  Notes/decisions:
+  - `PlayerName`/`PlayerSettings`/`LeagueData` view-models were **folded into the
+    Players/Leagues read-models** rather than kept as separate reactive view-models —
+    simpler and they're pure projections of the same events. (Reactive WS delivery,
+    like `SeasonRanks`, can be layered on later if the UI needs live pushes.)
+  - Added `@event-driven-io/pongo` as a direct dep (was transitive; TS couldn't resolve).
+  - Pongo gotchas: `updateOne` has no `upsert` option (use `upsertById` helper);
+    `countDocuments` returns a **string** (coerce with `Number()`); docs must be `type`
+    aliases (index-signature constraint).
+  - Read-model projections are **inline**, so they only apply to events appended after
+    registration — historical events need a rebuild (Phase 4 territory).
+  - `login` resolver deferred to **Phase 3** (auth); `byEmailRaw` exists to support it.
+
+- **Next: Phase 3** — auth: `@nestjs/passport` local + Slack strategies, JWT cookie guard
+  populating `request.user` (replacing the dev-header `@CurrentActor` stand-in), and the
+  `login` query.

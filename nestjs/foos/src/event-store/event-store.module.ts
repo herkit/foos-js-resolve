@@ -1,9 +1,11 @@
 import { Global, Module, Logger } from '@nestjs/common';
+import { projections } from '@event-driven-io/emmett';
 import {
   getPostgreSQLEventStore,
   type PostgresEventStore,
 } from '@event-driven-io/emmett-postgresql';
 import { EVENT_STORE } from './event-store.constants';
+import { readModelProjections } from '../read-models/read-model.projections';
 
 const DEFAULT_CONNECTION_STRING = 'postgresql://foos:foos@localhost:5432/foos';
 
@@ -25,7 +27,9 @@ const DEFAULT_CONNECTION_STRING = 'postgresql://foos:foos@localhost:5432/foos';
         new Logger('EventStore').log(
           `Connecting to event store: ${connectionString.replace(/:[^:@/]*@/, ':****@')}`,
         );
-        return getPostgreSQLEventStore(connectionString);
+        return getPostgreSQLEventStore(connectionString, {
+          projections: projections.inline(readModelProjections),
+        });
       },
     },
   ],
