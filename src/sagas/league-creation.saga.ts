@@ -15,6 +15,7 @@ import type { LeagueCreated } from '../league/league.events';
 import type { SeasonCreated } from '../season/season.events';
 import { SeasonService } from '../season/season.service';
 import { LeagueService } from '../league/league.service';
+import { LEAGUE_CREATION_SAGA_PROCESSOR_ID } from './league-creation.constants';
 
 type SagaMessage = LeagueCreated | SeasonCreated;
 
@@ -52,7 +53,7 @@ export class LeagueCreationSaga
       connectionString,
       processors: [
         postgreSQLReactor<SagaMessage>({
-          processorId: 'league-creation-saga',
+          processorId: LEAGUE_CREATION_SAGA_PROCESSOR_ID,
           canHandle: ['LEAGUE_CREATED', 'SEASON_CREATED'],
           // The processor lock is leased. After a hard kill (SIGKILL) the dead
           // process's lease lingers, so a restart can't acquire it. A short

@@ -153,6 +153,9 @@ importers:
       '@types/passport':
         specifier: ^1.0.17
         version: 1.0.17
+      '@types/pg':
+        specifier: ^8.11.10
+        version: 8.20.0
       '@types/supertest':
         specifier: ^6.0.2
         version: 6.0.3
@@ -174,6 +177,9 @@ importers:
       mysql2:
         specifier: ^3.22.5
         version: 3.22.5(@types/node@22.16.2)
+      pg:
+        specifier: ^8.22.0
+        version: 8.22.0
       prettier:
         specifier: ^3.4.2
         version: 3.6.2

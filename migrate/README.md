@@ -38,6 +38,33 @@ upon.
    Docker? See [SSL / managed Postgres](#ssl--managed-postgres) below — a plain
    `?sslmode=require` URL fails with `SELF_SIGNED_CERT_IN_CHAIN`.
 
+   After importing, the script seeds the `league-creation-saga` checkpoint to
+   the log head so the app doesn't replay history (and re-start orphan seasons)
+   on first boot.
+
+## Reruns / cleaning the target
+
+The import only **appends** — it never cleans the target. Running it twice
+against the same store would duplicate every event, so the script refuses to run
+when the target already has events:
+
+```
+Target already contains events. Rerunning would duplicate them. ...
+```
+
+To rerun, either point `EVENTSTORE_CONNECTION_STRING` at a fresh database, or set
+`MIG_TRUNCATE=1` to wipe the target first (Emmett tables + the
+`leagues`/`players`/`player_matches` read-models, and the global-position
+sequence):
+
+```bash
+MIG_TRUNCATE=1 \
+MIG_MYSQL_URL="mysql://root:root@localhost:3307/foos-events" \
+EVENTSTORE_CONNECTION_STRING="postgresql://foos:foos@localhost:5432/foos_migrated" \
+TS_NODE_TRANSPILE_ONLY=1 \
+node -r ts-node/register migrate/import-resolve-events.ts
+```
+
 ## SSL / managed Postgres
 
 The target `EVENTSTORE_CONNECTION_STRING` is handed straight to `pg`. Recent
