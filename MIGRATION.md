@@ -273,6 +273,12 @@ Stream naming convention: `streamId = \`${aggregateName}-${aggregateId}\``.
   - **Verified parity** (migrated vs original read-model): events 2939=2939,
     players 51=51, leagues 5=5, superuser 1=1 (Henrik Grotle). Migrated into the
     `foos_migrated` database.
+  - **Managed-Postgres target (SSL):** the target URL goes straight to `pg`, and
+    `pg-connection-string` (>=2.13) now treats `sslmode=require` as `verify-full`.
+    Managed providers (DigitalOcean, etc.) use a self-signed CA, so `?sslmode=require`
+    fails with `SELF_SIGNED_CERT_IN_CHAIN`. Use `?sslmode=no-verify` (quick) or
+    `?sslmode=verify-full&sslrootcert=<ca-certificate.crt>` (secure). See
+    `migrate/README.md` → "SSL / managed Postgres".
 
 - **Phase 5 — COMPLETE (build + serving verified; browser QA pending).** Frontend cut over
   from the reSolve client SDK via a **compatibility shim**, built with **Vite**, served by Nest.

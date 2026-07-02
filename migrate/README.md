@@ -34,6 +34,42 @@ upon.
    node -r ts-node/register migrate/import-resolve-events.ts
    ```
 
+   Migrating into a **managed Postgres** (DigitalOcean, etc.) instead of local
+   Docker? See [SSL / managed Postgres](#ssl--managed-postgres) below — a plain
+   `?sslmode=require` URL fails with `SELF_SIGNED_CERT_IN_CHAIN`.
+
+## SSL / managed Postgres
+
+The target `EVENTSTORE_CONNECTION_STRING` is handed straight to `pg`. Recent
+`pg-connection-string` (>=2.13, bundled with `pg` 8.x here) treats
+`sslmode=require` — and `prefer`/`verify-ca` — as an alias for `verify-full`,
+i.e. full CA-chain verification. Managed providers present a **self-signed CA**,
+so a stock `...?sslmode=require` URL fails with:
+
+```
+Migration failed: Error: self-signed certificate in certificate chain
+  code: 'SELF_SIGNED_CERT_IN_CHAIN'
+```
+
+Pick one on the **target** URL:
+
+- **Quickest (one-off migration):** `?sslmode=no-verify` — still TLS-encrypted,
+  just skips verifying the CA chain (`pg` sets `ssl.rejectUnauthorized=false`).
+
+  ```bash
+  EVENTSTORE_CONNECTION_STRING="postgresql://USER:PASS@db-xxx.ondigitalocean.com:25060/defaultdb?sslmode=no-verify"
+  ```
+
+- **Secure (verifies the CA):** download the `ca-certificate.crt` from the
+  database's connection details and reference it:
+
+  ```bash
+  EVENTSTORE_CONNECTION_STRING="postgresql://USER:PASS@db-xxx.ondigitalocean.com:25060/defaultdb?sslmode=verify-full&sslrootcert=/abs/path/to/ca-certificate.crt"
+  ```
+
+Avoid `NODE_TLS_REJECT_UNAUTHORIZED=0`: it disables TLS verification for the
+whole process (including the MySQL source connection), not just this URL.
+
 ## Notes
 
 - Events are replayed in **chronological order** (`timestamp`), not by
