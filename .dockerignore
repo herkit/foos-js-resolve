@@ -1,0 +1,44 @@
+# Dependencies & build output (reinstalled/rebuilt inside the image)
+node_modules
+dist
+client-dist
+build
+coverage
+
+# Tests & reports
+test-results
+playwright-report
+blob-report
+.playwright
+
+# Env & secrets — never bake into an image
+.env
+.env.*.local
+.env.local
+
+# Production MySQL event dump (prod data — see migrate/README.md). Never ship.
+mysql
+
+# One-off migration tooling — not part of the runtime (also excluded from nest build)
+migrate
+
+# VCS / CI / editor
+.git
+.gitignore
+.github
+.idea
+.vscode
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Logs & misc
+*.log
+npm-debug.log*
+pnpm-debug.log*
+*.pid
+*.seed
+*.pid.lock
+.DS_Store
