@@ -62,7 +62,6 @@ typings/
 dist
 
 event-storage.db
-package-lock.json
 code.zip
 static.zip
 
