@@ -20,6 +20,14 @@ export interface SeasonState {
 export const initialSeasonState = (): SeasonState => ({ matches: [] });
 
 /**
+ * Last-ditch rating when neither the command nor the parent league supplies one.
+ * Mirrors the League aggregate's own default (`decideCreateLeague`) so a season
+ * never silently diverges to the old `'basic'` fallback. In practice the
+ * effective rating is resolved from the parent league in `SeasonService`.
+ */
+export const DEFAULT_RATING = 'elo';
+
+/**
  * `evolve` == reSolve aggregate projection.
  *
  * NOTE (fidelity): the original projection reacted to `SEASON_STARTED` to set
@@ -69,7 +77,7 @@ export const decideCreateSeason = (
   if (!leagueid) throw new IllegalStateError('League must be specified');
   return {
     type: 'SEASON_CREATED',
-    data: { leagueid, rating: rating ?? 'basic' },
+    data: { leagueid, rating: rating ?? DEFAULT_RATING },
   };
 };
 

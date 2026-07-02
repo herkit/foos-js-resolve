@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { LeagueModule } from '../league/league.module';
 import { SeasonController } from './season.controller';
 import { SeasonService } from './season.service';
 import { SeasonGateway } from './season.gateway';
@@ -10,6 +11,7 @@ import { SeasonGateway } from './season.gateway';
  * Depends on the globally-provided Emmett event store (see EventStoreModule).
  */
 @Module({
+  imports: [LeagueModule],
   controllers: [SeasonController],
   providers: [SeasonService, SeasonGateway],
   exports: [SeasonService],
