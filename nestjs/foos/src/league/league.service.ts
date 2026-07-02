@@ -7,6 +7,7 @@ import {
   decideStartSeason,
   evolveLeague,
   initialLeagueState,
+  type LeagueState,
 } from './league.aggregate';
 
 const streamId = (leagueId: string): string => `league-${leagueId}`;
@@ -20,7 +21,11 @@ export class LeagueService {
 
   constructor(@Inject(EVENT_STORE) private readonly store: EventStore) {}
 
-  createLeague(leagueId: string, input: { name: string; rating?: string }, actor: Actor) {
+  createLeague(
+    leagueId: string,
+    input: { name: string; rating?: string },
+    actor: Actor,
+  ) {
     return this.handle(this.store, streamId(leagueId), (state) =>
       decideCreateLeague(state, input, actor),
     );
@@ -30,5 +35,14 @@ export class LeagueService {
     return this.handle(this.store, streamId(leagueId), (state) =>
       decideStartSeason(state, leagueId, input),
     );
+  }
+
+  /** Current aggregate state — used by the saga to stay idempotent. */
+  async getState(leagueId: string): Promise<LeagueState> {
+    const { state } = await this.store.aggregateStream(streamId(leagueId), {
+      evolve: evolveLeague,
+      initialState: initialLeagueState,
+    });
+    return state ?? initialLeagueState();
   }
 }

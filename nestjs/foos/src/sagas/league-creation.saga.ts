@@ -74,6 +74,15 @@ export class LeagueCreationSaga
             try {
               if (message.type === 'LEAGUE_CREATED') {
                 const leagueId = idFromStream(streamName, 'league-');
+                // Idempotency guard: if this league already has a season (a
+                // replayed LEAGUE_CREATED), don't mint another one.
+                const league = await this.leagues.getState(leagueId);
+                if (league.currentSeason || league.seasons.length > 0) {
+                  this.logger.debug(
+                    `LEAGUE_CREATED(${leagueId}) already has a season; skipping createSeason`,
+                  );
+                  return;
+                }
                 const seasonId = randomUUID();
                 await this.seasons.createSeason(seasonId, {
                   leagueid: leagueId,
