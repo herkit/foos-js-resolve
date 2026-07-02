@@ -28,5 +28,28 @@ export default defineConfig({
   build: {
     outDir: resolvePath('nestjs/foos/client-dist'),
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        // Split large vendor groups into separate, cacheable chunks so the main
+        // app chunk stays small.
+        manualChunks: {
+          vendor: [
+            'react',
+            'react-dom',
+            'react-router',
+            'react-router-dom',
+            'react-redux',
+            'redux',
+          ],
+          bootstrap: ['react-bootstrap'],
+          charts: [
+            'chart.js',
+            'react-chartjs-2',
+            'moment',
+            'chartjs-adapter-moment',
+          ],
+        },
+      },
+    },
   },
 })
