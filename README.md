@@ -1,25 +1,61 @@
-# Hello World Example
+# Foos
 
-![hello-world-typescript](https://user-images.githubusercontent.com/19663260/41165078-617d223c-6b45-11e8-8f9f-ffdc02e068ae.png)
+Foosball league app — a NestJS backend (event sourcing with
+[Emmett](https://event-driven-io.github.io/emmett/) on PostgreSQL) and a React
+SPA, **served as a single runtime**: `node dist/main.js` serves the API under
+`/api` and the built SPA at `/`.
 
-This is an empty app used as a default template for new **reSolve** applications.
+Migrated from an abandoned reSolve app — see [MIGRATION.md](./MIGRATION.md).
 
-To create aa new TypeScript project based on this example, type:
+## Layout
 
-```sh
-npx create-resolve-app hello-world-react -e react -t
+```
+src/          NestJS backend (aggregates, read-models, sagas, auth, gateway)
+web/          React SPA sources (Vite; client/, index.html, static/)
+migrate/      one-time reSolve MySQL -> Emmett event exporter
+e2e/          Playwright end-to-end tests
+client-dist/  built SPA (gitignored; produced by `pnpm build:web`)
 ```
 
-To create a JavaScript project, type:
+## Prerequisites
 
-```sh
-npx create-resolve-app hello-world-react -e react
+- Node 20+, [pnpm](https://pnpm.io), Docker (for PostgreSQL)
+
+## Setup
+
+```bash
+pnpm install
+docker compose up -d          # PostgreSQL on :5432 (foos/foos)
 ```
 
-## What's next?
+## Develop
 
-📑 Available scripts, project structure overview, configuration files, and more useful information can be found in the [**API References**](https://reimagined.github.io/resolve/docs/api-reference) topic.
+Two processes with hot reload (SPA proxies /api + /socket.io to the API):
 
-📑 You can learn how to create simple applications with reSolve in the [**Step-by-Step Tutorial**](https://reimagined.github.io/resolve/docs/tutorial).
+```bash
+pnpm start:dev                # NestJS API on :3000 (watch)
+pnpm dev:web                  # Vite dev server on :5173  -> open this
+```
 
-![Analytics](https://ga-beacon.appspot.com/UA-118635726-1/examples-hello-world-readme?pixel)
+## Build & run (single runtime)
+
+```bash
+pnpm build                    # build:web (SPA) then build:server (Nest)
+pnpm start                    # node dist/main.js -> http://localhost:3000
+```
+
+Config via env (see `.env.example`): `EVENTSTORE_CONNECTION_STRING`, `PORT`,
+`JWT_SECRET`, and `SLACK_CLIENT_ID`/`SLACK_CLIENT_SECRET` (optional).
+
+## Test
+
+```bash
+pnpm test                     # backend unit tests (jest)
+pnpm e2e                      # Playwright critical flows (writable DB)
+pnpm e2e:migrated             # read-only checks vs migrated data (foos_migrated)
+```
+
+## Data migration
+
+See [migrate/README.md](./migrate/README.md) to import a reSolve MySQL event
+dump into a fresh Emmett store.
