@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { CommandHandler, type EventStore } from '@event-driven-io/emmett';
 import { Subject } from 'rxjs';
 import { EVENT_STORE } from '../event-store/event-store.constants';
+import { LeagueService } from '../league/league.service';
 import {
   decideCreateSeason,
   decideRegisterMatch,
@@ -40,14 +41,27 @@ export class SeasonService {
   private readonly updates$ = new Subject<RanksUpdate>();
   readonly updates = this.updates$.asObservable();
 
-  constructor(@Inject(EVENT_STORE) private readonly store: EventStore) {}
+  constructor(
+    @Inject(EVENT_STORE) private readonly store: EventStore,
+    private readonly leagues: LeagueService,
+  ) {}
 
+  /**
+   * Create a season, inheriting its rating method from the parent league.
+   *
+   * A caller may still pin a rating explicitly (the LeagueCreation saga passes
+   * the one carried on `LEAGUE_CREATED`); when it doesn't, we resolve it from
+   * the league's current state so a new season always uses the league's rating
+   * method rather than silently defaulting.
+   */
   async createSeason(
     seasonId: string,
     input: { leagueid: string; rating?: string },
   ): Promise<SeasonRanksState> {
+    const rating =
+      input.rating ?? (await this.leagues.getState(input.leagueid)).rating;
     await this.handle(this.store, streamId(seasonId), (state) =>
-      decideCreateSeason(state, input),
+      decideCreateSeason(state, { leagueid: input.leagueid, rating }),
     );
     return this.getRanks(seasonId);
   }
