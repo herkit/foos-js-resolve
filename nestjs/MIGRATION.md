@@ -310,5 +310,23 @@ Stream naming convention: `streamId = \`${aggregateName}-${aggregateId}\``.
     have bloated/broken the browser bundle.
   - reSolve SSR is dropped (client-side rendering only), as decided.
 
-- **Next: Phase 6** — parity test & cutover: E2E in a browser (create player, register match,
-  live scoreboard), run against the migrated data, then production cutover.
+- **Phase 6 — IN PROGRESS (browser QA done; automated E2E added).** Manual browser testing
+  surfaced and fixed a chain of real issues, then an automated suite was added:
+  - **Blank page** — Vite couldn't parse JSX-in-`.js` (renamed client sources to `.jsx`,
+    dropped the loader override) and `react-moment` crashed under Vite (replaced with a small
+    `moment` component).
+  - **Login not recognised** — the `jwt` cookie is httpOnly; the SPA now detects auth via
+    `GET /auth/me` instead of reading the cookie.
+  - **New league stuck on "Loading"** — the LeagueCreation reactor halted on a replayed
+    `startSeason` (`IllegalStateError` stops the processor). Made it idempotent: swallow
+    already-applied domain conflicts, and skip `createSeason` when the league already has a
+    season (`LeagueService.getState`). The view-model shim now polls (change-detected) so the
+    async season appears without a manual refresh.
+  - **Automated E2E** (`nestjs/foos/e2e/`, Playwright): app loads; register → logged in →
+    create league → season Scoreboard appears. Both pass against chromium. Run with
+    `pnpm e2e` (Nest serves SPA + API; Postgres up; SPA + API built).
+  - Note: the ported email validation only accepts 2-3 char TLDs (faithful to reSolve).
+
+  Remaining before production cutover: run E2E against a copy of migrated prod data, add
+  match-registration + live-scoreboard coverage, code-split the bundle, and reconcile the
+  root lockfile / drop now-unused deps (react-moment, jwt-decode).
