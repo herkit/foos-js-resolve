@@ -5,6 +5,12 @@
 # built SPA (vite build output; produced by `npm run web:build` at repo root)
 /client-dist
 
+# Playwright
+/test-results
+/playwright-report
+/blob-report
+/.playwright
+
 # Logs
 logs
 *.log
