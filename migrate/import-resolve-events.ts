@@ -12,6 +12,15 @@
  *   MIG_MYSQL_URL=mysql://root:root@localhost:3307/foos-events \
  *   EVENTSTORE_CONNECTION_STRING=postgresql://foos:foos@localhost:5432/foos_migrated \
  *   node -r ts-node/register migrate/import-resolve-events.ts
+ *
+ * SSL / managed Postgres (e.g. DigitalOcean): the target URL is passed straight
+ * to `pg`, and `pg-connection-string` (>=2.13) now treats `sslmode=require` as
+ * an alias for `verify-full` — full CA-chain verification. Managed providers use
+ * a self-signed CA, so `?sslmode=require` fails with SELF_SIGNED_CERT_IN_CHAIN.
+ * Fixes for the target URL:
+ *   - Quickest: `?sslmode=no-verify` (still TLS-encrypted, skips CA verification).
+ *   - Secure:   `?sslmode=verify-full&sslrootcert=/abs/path/to/ca-certificate.crt`
+ *               (download the CA from the provider's connection details).
  */
 import mysql from 'mysql2/promise';
 import { getPostgreSQLEventStore } from '@event-driven-io/emmett-postgresql';
