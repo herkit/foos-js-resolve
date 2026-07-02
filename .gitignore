@@ -200,3 +200,7 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Production MySQL event-store dump used to build/test the Phase 4 event
+# migration (see nestjs/MIGRATION.md). Contains prod data — never commit.
+mysql/

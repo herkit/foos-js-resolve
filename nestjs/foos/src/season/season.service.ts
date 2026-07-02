@@ -1,0 +1,75 @@
+import { Inject, Injectable } from '@nestjs/common';
+import { CommandHandler, type EventStore } from '@event-driven-io/emmett';
+import { Subject } from 'rxjs';
+import { EVENT_STORE } from '../event-store/event-store.constants';
+import {
+  decideCreateSeason,
+  decideRegisterMatch,
+  evolveSeason,
+  initialSeasonState,
+} from './season.aggregate';
+import {
+  evolveSeasonRanks,
+  initialSeasonRanks,
+  type SeasonRanksState,
+} from './season-ranks.view';
+
+const streamId = (seasonId: string): string => `season-${seasonId}`;
+
+export interface RanksUpdate {
+  seasonId: string;
+  ranks: SeasonRanksState;
+}
+
+/**
+ * Season write + read facade.
+ *
+ * - Commands go through Emmett's `CommandHandler` (load stream -> evolve ->
+ *   decide -> append), replacing reSolve's `executeCommand`.
+ * - Reads fold the stream into the `SeasonRanks` view-model, replacing
+ *   reSolve's `executeQuery` / reactive view-model.
+ * - `updates$` fans out live view-model changes to the WebSocket gateway.
+ */
+@Injectable()
+export class SeasonService {
+  private readonly handle = CommandHandler({
+    evolve: evolveSeason,
+    initialState: initialSeasonState,
+  });
+
+  private readonly updates$ = new Subject<RanksUpdate>();
+  readonly updates = this.updates$.asObservable();
+
+  constructor(@Inject(EVENT_STORE) private readonly store: EventStore) {}
+
+  async createSeason(
+    seasonId: string,
+    input: { leagueid: string; rating?: string },
+  ): Promise<SeasonRanksState> {
+    await this.handle(this.store, streamId(seasonId), (state) =>
+      decideCreateSeason(state, input),
+    );
+    return this.getRanks(seasonId);
+  }
+
+  async registerMatch(
+    seasonId: string,
+    input: { matchid: string; winners: string[]; losers: string[] },
+  ): Promise<SeasonRanksState> {
+    const command = { ...input, timestamp: Date.now() };
+    await this.handle(this.store, streamId(seasonId), (state) =>
+      decideRegisterMatch(state, command),
+    );
+    const ranks = await this.getRanks(seasonId);
+    this.updates$.next({ seasonId, ranks });
+    return ranks;
+  }
+
+  async getRanks(seasonId: string): Promise<SeasonRanksState> {
+    const { state } = await this.store.aggregateStream(streamId(seasonId), {
+      evolve: evolveSeasonRanks,
+      initialState: initialSeasonRanks,
+    });
+    return state ?? initialSeasonRanks();
+  }
+}

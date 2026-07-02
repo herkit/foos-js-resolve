@@ -21,7 +21,7 @@ const Login = (props) => {
         <div case="login">
           <AuthForm
             buttonText="Login"
-            action={`/api/login${location.search}`}
+            endpoint="login"
             title="Please sign in"
           />
           <div className='mt-3'>
@@ -38,7 +38,7 @@ const Login = (props) => {
         <div case="signup">
           <AuthForm
             buttonText="Create account"
-            action={`/api/register${location.search}`}
+            endpoint="register"
             title="Create account"
           />
           <div className='mt-3'>

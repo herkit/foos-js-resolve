@@ -13,7 +13,6 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { ConfigService } from 'aws-sdk';
 
 export const options = {
   responsive: true,
