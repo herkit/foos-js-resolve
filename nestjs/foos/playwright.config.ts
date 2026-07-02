@@ -14,6 +14,9 @@ const BASE_URL = `http://localhost:${PORT}`;
 
 export default defineConfig({
   testDir: './e2e',
+  // The migrated-data suite needs the read-only foos_migrated DB; it has its own
+  // config (playwright.migrated.config.ts / `pnpm e2e:migrated`).
+  testIgnore: '**/migrated-data.spec.ts',
   timeout: 60_000,
   expect: { timeout: 20_000 },
   fullyParallel: false,
@@ -23,9 +26,7 @@ export default defineConfig({
     baseURL: BASE_URL,
     trace: 'on-first-retry',
   },
-  projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-  ],
+  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
     command: 'node dist/main.js',
     url: `${BASE_URL}/api/players`,
