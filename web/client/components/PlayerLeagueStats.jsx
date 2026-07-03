@@ -1,16 +1,19 @@
-import React, { useEffect, useState } from 'react'
-import { PlayerName } from './PlayerName'
-import { fetchPlayerLeagueStats } from '../api/endpoints'
+import React, { useEffect, useState } from 'react';
+import { PlayerName } from './PlayerName';
+import { fetchPlayerLeagueStats } from '../api/endpoints';
+
+// Career card surfaces only the worst offenders; the API returns all of them.
+const MAX_NEMESES = 5;
 
 const Stat = ({ label, value }) => (
   <div className="text-center px-2">
     <div className="display-6">{value}</div>
     <small className="text-muted">{label}</small>
   </div>
-)
+);
 
 const TeammateLine = ({ label, teammate, countKey }) => {
-  if (!teammate) return null
+  if (!teammate) return null;
   return (
     <div className="d-flex justify-content-between py-1">
       <span>
@@ -20,8 +23,8 @@ const TeammateLine = ({ label, teammate, countKey }) => {
         {teammate[countKey]} {countKey === 'won' ? 'wins' : 'losses'} together
       </span>
     </div>
-  )
-}
+  );
+};
 
 /**
  * A player's career card within a single league: totals, high/low score,
@@ -29,27 +32,28 @@ const TeammateLine = ({ label, teammate, countKey }) => {
  * stats are folded on demand server-side (no reactive socket needed).
  */
 const PlayerLeagueStats = ({ leagueId, playerId }) => {
-  const [stats, setStats] = useState(null)
-  const [error, setError] = useState(null)
+  const [stats, setStats] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    let active = true
-    setStats(null)
-    setError(null)
+    let active = true;
+    setStats(null);
+    setError(null);
     fetchPlayerLeagueStats(leagueId, playerId)
       .then((data) => {
-        if (active) setStats(data)
+        if (active) setStats(data);
       })
       .catch((err) => {
-        if (active) setError(err.message ?? 'Failed to load stats')
-      })
+        if (active) setError(err.message ?? 'Failed to load stats');
+      });
     return () => {
-      active = false
-    }
-  }, [leagueId, playerId])
+      active = false;
+    };
+  }, [leagueId, playerId]);
 
-  if (error) return <div className="text-danger">Could not load stats: {error}</div>
-  if (!stats) return <div>Loading…</div>
+  if (error)
+    return <div className="text-danger">Could not load stats: {error}</div>;
+  if (!stats) return <div>Loading…</div>;
 
   if (stats.played === 0) {
     return (
@@ -59,7 +63,7 @@ const PlayerLeagueStats = ({ leagueId, playerId }) => {
         </h3>
         <p className="text-muted">No matches played in this league yet.</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -82,8 +86,16 @@ const PlayerLeagueStats = ({ leagueId, playerId }) => {
       {(stats.bestTeammate || stats.worstTeammate) && (
         <div className="mb-3">
           <h4 className="h6">Teammates</h4>
-          <TeammateLine label="Best" teammate={stats.bestTeammate} countKey="won" />
-          <TeammateLine label="Worst" teammate={stats.worstTeammate} countKey="lost" />
+          <TeammateLine
+            label="Best"
+            teammate={stats.bestTeammate}
+            countKey="won"
+          />
+          <TeammateLine
+            label="Worst"
+            teammate={stats.worstTeammate}
+            countKey="lost"
+          />
         </div>
       )}
 
@@ -92,12 +104,14 @@ const PlayerLeagueStats = ({ leagueId, playerId }) => {
           <h4 className="h6">Nemeses</h4>
           <table className="table table-sm">
             <tbody>
-              {stats.nemeses.map((nemesis) => (
+              {stats.nemeses.slice(0, MAX_NEMESES).map((nemesis) => (
                 <tr key={nemesis.playerId}>
                   <td>
                     <PlayerName playerid={nemesis.playerId} />
                   </td>
-                  <td className="text-end text-muted">{nemesis.losses} losses</td>
+                  <td className="text-end text-muted">
+                    {nemesis.losses} losses
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -105,7 +119,7 @@ const PlayerLeagueStats = ({ leagueId, playerId }) => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export { PlayerLeagueStats }
+export { PlayerLeagueStats };

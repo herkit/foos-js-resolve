@@ -117,14 +117,21 @@ const SeasonView = ({ id, leagueId }) => {
                 <tr key={player.id} className={classesByRank(idx)}>
                   <td className="text-start">
                     {leagueId ? (
-                      <button
-                        type="button"
-                        className="btn btn-link p-0 text-start text-reset text-decoration-none"
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        style={{ cursor: 'pointer' }}
                         onClick={() => setStatsPlayer(player.id)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            setStatsPlayer(player.id);
+                          }
+                        }}
                         title="View career stats in this league"
                       >
                         <PlayerName playerid={player.id}></PlayerName>
-                      </button>
+                      </span>
                     ) : (
                       <PlayerName playerid={player.id}></PlayerName>
                     )}
