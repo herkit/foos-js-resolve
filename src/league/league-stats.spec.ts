@@ -16,6 +16,13 @@ const foldMatches = (
     initialStatsAccumulator(),
   );
 
+/** Repeat a match `n` times. */
+const times = (
+  n: number,
+  match: { winners: string[]; losers: string[] },
+): { winners: string[]; losers: string[] }[] =>
+  Array.from({ length: n }, () => match);
+
 describe('accumulateMatch', () => {
   it('ignores matches the player did not take part in', () => {
     const acc = accumulateMatch(initialStatsAccumulator(), 'me', {
@@ -36,11 +43,12 @@ describe('accumulateMatch', () => {
     expect(acc.lost).toBe(1);
   });
 
-  it('records no teammates in singles-only play', () => {
-    const acc = foldMatches('me', [{ winners: ['me'], losers: ['a'] }]);
-    const stats = finalizeStats('L', 'me', acc);
-    expect(stats.bestTeammate).toBeNull();
-    expect(stats.worstTeammate).toBeNull();
+  it('records the head-to-head record against opponents (wins and losses)', () => {
+    const acc = foldMatches('me', [
+      { winners: ['me'], losers: ['a'] },
+      { winners: ['a'], losers: ['me'] },
+    ]);
+    expect(acc.opponents['a']).toEqual({ playerId: 'a', won: 1, lost: 1 });
   });
 
   it('does not mutate the input accumulator (immutability)', () => {
@@ -50,13 +58,11 @@ describe('accumulateMatch', () => {
   });
 });
 
-describe('finalizeStats — teammates (2v2)', () => {
+describe('finalizeStats — teammates (by count)', () => {
   it('picks best teammate by shared wins and worst by shared losses', () => {
     const acc = foldMatches('me', [
-      { winners: ['me', 'ally'], losers: ['a', 'b'] }, // won with ally
-      { winners: ['me', 'ally'], losers: ['a', 'b'] }, // won with ally
-      { winners: ['a', 'b'], losers: ['me', 'burden'] }, // lost with burden
-      { winners: ['a', 'b'], losers: ['me', 'burden'] }, // lost with burden
+      ...times(2, { winners: ['me', 'ally'], losers: ['a', 'b'] }), // won with ally x2
+      ...times(2, { winners: ['a', 'b'], losers: ['me', 'burden'] }), // lost with burden x2
       { winners: ['me', 'burden'], losers: ['a', 'b'] }, // won with burden once
     ]);
     const stats = finalizeStats('L', 'me', acc);
@@ -68,22 +74,28 @@ describe('finalizeStats — teammates (2v2)', () => {
       lost: 2,
     });
   });
+
+  it('records no teammates in singles-only play', () => {
+    const acc = foldMatches('me', [{ winners: ['me'], losers: ['a'] }]);
+    const stats = finalizeStats('L', 'me', acc);
+    expect(stats.bestTeammate).toBeNull();
+    expect(stats.worstTeammate).toBeNull();
+  });
 });
 
-describe('finalizeStats — nemeses', () => {
-  it('orders opponents by losses-against descending, counting all winners', () => {
+describe('finalizeStats — nemeses (by losses)', () => {
+  it('orders opponents by losses-against descending, keeping the full record', () => {
     const acc = foldMatches('me', [
-      { winners: ['x', 'y'], losers: ['me', 'p'] }, // lost to x, y
-      { winners: ['x', 'z'], losers: ['me', 'p'] }, // lost to x, z
-      { winners: ['x'], losers: ['me'] }, // lost to x
-      { winners: ['me'], losers: ['x'] }, // beat x — not a loss
+      ...times(3, { winners: ['x'], losers: ['me'] }), // lost to x x3
+      { winners: ['me'], losers: ['x'] }, // beat x once
+      { winners: ['y'], losers: ['me'] }, // lost to y once
+      { winners: ['me'], losers: ['z'] }, // only ever beat z — not a nemesis
     ]);
     const stats = finalizeStats('L', 'me', acc);
 
     expect(stats.nemeses).toEqual([
-      { playerId: 'x', losses: 3 },
-      { playerId: 'y', losses: 1 },
-      { playerId: 'z', losses: 1 },
+      { playerId: 'x', won: 1, lost: 3 },
+      { playerId: 'y', won: 0, lost: 1 },
     ]);
   });
 });
