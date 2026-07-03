@@ -1,11 +1,15 @@
-import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { CurrentActor, type Actor } from '../common/actor';
 import { JwtCookieGuard } from '../auth/jwt-cookie.guard';
 import { LeagueService } from './league.service';
+import { LeagueStatsService } from './league-stats.service';
 
 @Controller('leagues')
 export class LeagueController {
-  constructor(private readonly leagues: LeagueService) {}
+  constructor(
+    private readonly leagues: LeagueService,
+    private readonly stats: LeagueStatsService,
+  ) {}
 
   @Post(':id')
   @UseGuards(JwtCookieGuard)
@@ -22,5 +26,12 @@ export class LeagueController {
   @Post(':id/seasons')
   startSeason(@Param('id') id: string, @Body() body: { seasonid: string }) {
     return this.leagues.startSeason(id, body);
+  }
+
+  // Public read: a player's career stats across every season in this league.
+  // Mirrors the public `GET /seasons/:id/ranks`.
+  @Get(':id/players/:playerId/stats')
+  playerStats(@Param('id') id: string, @Param('playerId') playerId: string) {
+    return this.stats.getPlayerStats(id, playerId);
   }
 }
