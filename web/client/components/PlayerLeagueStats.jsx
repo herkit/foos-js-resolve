@@ -5,6 +5,10 @@ import { fetchPlayerLeagueStats } from '../api/endpoints';
 // Career card surfaces only the worst offenders; the API returns all of them.
 const MAX_NEMESES = 5;
 
+// Match the scoreboard's win/loss ratio formatting (undefeated shows "∞").
+const formatRatio = ({ won, lost }) =>
+  lost === 0 ? '∞' : (won / lost).toFixed(2);
+
 const Stat = ({ label, value }) => (
   <div className="text-center px-2">
     <div className="display-6">{value}</div>
@@ -12,7 +16,7 @@ const Stat = ({ label, value }) => (
   </div>
 );
 
-const TeammateLine = ({ label, teammate, countKey }) => {
+const TeammateLine = ({ label, teammate }) => {
   if (!teammate) return null;
   return (
     <div className="d-flex justify-content-between py-1">
@@ -20,7 +24,7 @@ const TeammateLine = ({ label, teammate, countKey }) => {
         {label}: <PlayerName playerid={teammate.playerId} />
       </span>
       <span className="text-muted">
-        {teammate[countKey]} {countKey === 'won' ? 'wins' : 'losses'} together
+        {teammate.won}–{teammate.lost} together (W/L {formatRatio(teammate)})
       </span>
     </div>
   );
@@ -86,16 +90,8 @@ const PlayerLeagueStats = ({ leagueId, playerId }) => {
       {(stats.bestTeammate || stats.worstTeammate) && (
         <div className="mb-3">
           <h4 className="h6">Teammates</h4>
-          <TeammateLine
-            label="Best"
-            teammate={stats.bestTeammate}
-            countKey="won"
-          />
-          <TeammateLine
-            label="Worst"
-            teammate={stats.worstTeammate}
-            countKey="lost"
-          />
+          <TeammateLine label="Best" teammate={stats.bestTeammate} />
+          <TeammateLine label="Worst" teammate={stats.worstTeammate} />
         </div>
       )}
 
@@ -110,7 +106,7 @@ const PlayerLeagueStats = ({ leagueId, playerId }) => {
                     <PlayerName playerid={nemesis.playerId} />
                   </td>
                   <td className="text-end text-muted">
-                    {nemesis.losses} losses
+                    {nemesis.won}–{nemesis.lost} (W/L {formatRatio(nemesis)})
                   </td>
                 </tr>
               ))}

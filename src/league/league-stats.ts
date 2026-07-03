@@ -10,20 +10,22 @@
  * Data source: the `SEASON_MATCH_REGISTERED` event (`{ winners, losers }`),
  * which covers both 1v1 (one id per side) and 2v2 (two ids per side). Teammates
  * therefore only accrue in 2v2 play; a singles-only league yields no partner.
+ *
+ * Best/worst teammate and nemeses are ranked by raw counts (most wins together,
+ * most losses together, most losses against). Each record still carries the full
+ * win/loss tally so the card can display the pairing's win/loss ratio.
  */
 
-/** A partner the player has shared a team with, and the shared W/L tally. */
-export interface TeammateStat {
+/** A player's head-to-head record with a partner or opponent (from the subject
+ * player's perspective: `won`/`lost` are the subject's wins/losses). */
+export interface HeadToHead {
   playerId: string;
   won: number;
   lost: number;
 }
 
-/** An opponent the player has lost to, and how many times. */
-export interface NemesisStat {
-  playerId: string;
-  losses: number;
-}
+export type TeammateStat = HeadToHead;
+export type NemesisStat = HeadToHead;
 
 export interface PlayerLeagueStats {
   leagueId: string;
@@ -39,7 +41,7 @@ export interface PlayerLeagueStats {
   bestTeammate: TeammateStat | null;
   /** Partner with the most shared losses; null in singles-only play. */
   worstTeammate: TeammateStat | null;
-  /** Opponents ordered by losses-against, descending. */
+  /** Opponents the player has lost to, ordered by losses-against descending. */
   nemeses: NemesisStat[];
 }
 
@@ -52,8 +54,8 @@ export interface StatsAccumulator {
   played: number;
   won: number;
   lost: number;
-  teammates: Record<string, TeammateStat>;
-  opponents: Record<string, NemesisStat>;
+  teammates: Record<string, HeadToHead>;
+  opponents: Record<string, HeadToHead>;
   /** One entry per season the player actually appeared in. */
   seasonFinalRanks: number[];
 }
@@ -88,27 +90,16 @@ interface MatchResult {
   losers: string[];
 }
 
-const bumpTeammate = (
-  teammates: Record<string, TeammateStat>,
-  partners: string[],
+/** Increment `won` or `lost` for each of `ids` in a head-to-head record map. */
+const bumpRecords = (
+  records: Record<string, HeadToHead>,
+  ids: string[],
   outcome: 'won' | 'lost',
-): Record<string, TeammateStat> =>
-  partners.reduce((acc, partnerId) => {
-    const prev = acc[partnerId] ?? { playerId: partnerId, won: 0, lost: 0 };
-    return {
-      ...acc,
-      [partnerId]: { ...prev, [outcome]: prev[outcome] + 1 },
-    };
-  }, teammates);
-
-const bumpOpponents = (
-  opponents: Record<string, NemesisStat>,
-  beatenBy: string[],
-): Record<string, NemesisStat> =>
-  beatenBy.reduce((acc, opponentId) => {
-    const prev = acc[opponentId] ?? { playerId: opponentId, losses: 0 };
-    return { ...acc, [opponentId]: { ...prev, losses: prev.losses + 1 } };
-  }, opponents);
+): Record<string, HeadToHead> =>
+  ids.reduce((acc, id) => {
+    const prev = acc[id] ?? { playerId: id, won: 0, lost: 0 };
+    return { ...acc, [id]: { ...prev, [outcome]: prev[outcome] + 1 } };
+  }, records);
 
 /**
  * Fold a single match into the accumulator from `playerId`'s perspective.
@@ -128,11 +119,13 @@ export const accumulateMatch = (
       ...acc,
       played: acc.played + 1,
       won: acc.won + 1,
-      teammates: bumpTeammate(
+      teammates: bumpRecords(
         acc.teammates,
         winners.filter((id) => id !== playerId),
         'won',
       ),
+      // The player beat these opponents this match.
+      opponents: bumpRecords(acc.opponents, losers, 'won'),
     };
   }
 
@@ -140,12 +133,13 @@ export const accumulateMatch = (
     ...acc,
     played: acc.played + 1,
     lost: acc.lost + 1,
-    teammates: bumpTeammate(
+    teammates: bumpRecords(
       acc.teammates,
       losers.filter((id) => id !== playerId),
       'lost',
     ),
-    opponents: bumpOpponents(acc.opponents, winners),
+    // These opponents beat the player this match.
+    opponents: bumpRecords(acc.opponents, winners, 'lost'),
   };
 };
 
@@ -160,16 +154,14 @@ export const withSeasonFinalRank = (
 
 export const initialStatsAccumulator = emptyAccumulator;
 
-/** Pick the teammate with the highest count for `key`; null if none / all zero. */
-const pickTeammate = (
-  teammates: Record<string, TeammateStat>,
+/** Record with the highest `key` count (must be > 0); null if none. */
+const topBy = (
+  records: Record<string, HeadToHead>,
   key: 'won' | 'lost',
-): TeammateStat | null => {
-  const best = Object.values(teammates)
-    .filter((t) => t[key] > 0)
-    .sort((a, b) => b[key] - a[key])[0];
-  return best ?? null;
-};
+): HeadToHead | null =>
+  Object.values(records)
+    .filter((r) => r[key] > 0)
+    .sort((a, b) => b[key] - a[key])[0] ?? null;
 
 /** Collapse the accumulator into the public career-card shape. */
 export const finalizeStats = (
@@ -186,10 +178,10 @@ export const finalizeStats = (
     lost: acc.lost,
     highScore: ranks.length ? Math.max(...ranks) : null,
     lowScore: ranks.length ? Math.min(...ranks) : null,
-    bestTeammate: pickTeammate(acc.teammates, 'won'),
-    worstTeammate: pickTeammate(acc.teammates, 'lost'),
+    bestTeammate: topBy(acc.teammates, 'won'),
+    worstTeammate: topBy(acc.teammates, 'lost'),
     nemeses: Object.values(acc.opponents)
-      .filter((o) => o.losses > 0)
-      .sort((a, b) => b.losses - a.losses),
+      .filter((o) => o.lost > 0)
+      .sort((a, b) => b.lost - a.lost),
   };
 };
