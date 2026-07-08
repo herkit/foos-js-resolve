@@ -37,7 +37,12 @@ export interface SeasonRanksState {
     { timestamp: number; rank: number; matchnumber: number }[]
   >;
   rating: string;
-  recentMatches: { timestamp: number; winners: string[]; losers: string[] }[];
+  recentMatches: {
+    matchid: string;
+    timestamp: number;
+    winners: string[];
+    losers: string[];
+  }[];
   matchcount?: number;
   records?: { winStreak: RankRecord; lossStreak: RankRecord };
 }
@@ -118,7 +123,7 @@ export const evolveSeasonRanks = (
       return { ...state, rating: event.data.rating ?? state.rating };
 
     case 'SEASON_MATCH_REGISTERED': {
-      const { winners, losers, timestamp } = event.data;
+      const { matchid, winners, losers, timestamp } = event.data;
       const ranks = [...state.ranks];
 
       const winnerranks = winners.map(
@@ -217,7 +222,7 @@ export const evolveSeasonRanks = (
           },
         },
         recentMatches: [
-          { timestamp, winners, losers },
+          { matchid, timestamp, winners, losers },
           ...state.recentMatches,
         ].slice(0, 5),
       };

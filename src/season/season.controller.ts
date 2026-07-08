@@ -1,4 +1,6 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { CurrentActor, type Actor } from '../common/actor';
+import { JwtCookieGuard } from '../auth/jwt-cookie.guard';
 import { SeasonService } from './season.service';
 
 interface CreateSeasonBody {
@@ -10,6 +12,16 @@ interface RegisterMatchBody {
   matchid: string;
   winners: string[];
   losers: string[];
+}
+
+interface CorrectMatchBody {
+  winners: string[];
+  losers: string[];
+  reason: string;
+}
+
+interface VoidMatchBody {
+  reason: string;
 }
 
 /**
@@ -37,6 +49,37 @@ export class SeasonController {
       winners: body.winners,
       losers: body.losers,
     });
+  }
+
+  @Post(':id/matches/:matchid/correct')
+  @UseGuards(JwtCookieGuard)
+  correctMatch(
+    @Param('id') id: string,
+    @Param('matchid') matchid: string,
+    @Body() body: CorrectMatchBody,
+    @CurrentActor() actor: Actor,
+  ) {
+    return this.seasons.correctMatch(
+      id,
+      {
+        matchid,
+        winners: body.winners,
+        losers: body.losers,
+        reason: body.reason,
+      },
+      actor,
+    );
+  }
+
+  @Post(':id/matches/:matchid/void')
+  @UseGuards(JwtCookieGuard)
+  voidMatch(
+    @Param('id') id: string,
+    @Param('matchid') matchid: string,
+    @Body() body: VoidMatchBody,
+    @CurrentActor() actor: Actor,
+  ) {
+    return this.seasons.voidMatch(id, { matchid, reason: body.reason }, actor);
   }
 
   @Get(':id/ranks')

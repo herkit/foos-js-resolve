@@ -1,9 +1,12 @@
 import type { Command } from '@event-driven-io/emmett';
 import { IllegalStateError } from '@event-driven-io/emmett';
+import type { Actor } from '../common/actor';
 import type {
   SeasonCreated,
   SeasonEvent,
+  SeasonMatchCorrected,
   SeasonMatchRegistered,
+  SeasonMatchVoided,
 } from './season.events';
 
 /**
@@ -13,6 +16,13 @@ import type {
  */
 export interface SeasonState {
   matches: string[];
+  /** Match id -> the player ids on record for it (winners + losers), tracking
+   *  the latest known roster after any correction. Used to authorize who may
+   *  correct/void a match. */
+  participants?: Record<string, string[]>;
+  /** Match ids that have been voided — kept so voids can't double-apply and a
+   *  voided match can't be corrected. */
+  voided?: string[];
   leagueid?: string;
   createdAt?: number;
 }
@@ -45,7 +55,29 @@ export const evolveSeason = (
       // dead; we set `leagueid` for completeness and leave `createdAt` unset.
       return { ...state, leagueid: event.data.leagueid };
     case 'SEASON_MATCH_REGISTERED':
-      return { ...state, matches: [...state.matches, event.data.matchid] };
+      return {
+        ...state,
+        matches: [...state.matches, event.data.matchid],
+        participants: {
+          ...state.participants,
+          [event.data.matchid]: [...event.data.winners, ...event.data.losers],
+        },
+      };
+    case 'SEASON_MATCH_CORRECTED':
+      // Track the corrected roster so involvement checks follow the latest
+      // outcome; adds/removes no match id.
+      return {
+        ...state,
+        participants: {
+          ...state.participants,
+          [event.data.matchid]: [...event.data.winners, ...event.data.losers],
+        },
+      };
+    case 'SEASON_MATCH_VOIDED':
+      return {
+        ...state,
+        voided: [...(state.voided ?? []), event.data.matchid],
+      };
     default:
       return state;
   }
@@ -81,6 +113,15 @@ export const decideCreateSeason = (
   };
 };
 
+/** Shared outcome validation for registering and correcting a match. */
+const assertValidOutcome = (winners: string[], losers: string[]): void => {
+  if (!Array.isArray(winners) || !Array.isArray(losers))
+    throw new IllegalStateError('winners and losers must be arrays');
+  const all = [...winners, ...losers];
+  if (new Set(all).size !== all.length)
+    throw new IllegalStateError('A user can only appear once in a game');
+};
+
 export const decideRegisterMatch = (
   state: SeasonState,
   { matchid, winners, losers, timestamp }: RegisterMatch['data'],
@@ -91,13 +132,79 @@ export const decideRegisterMatch = (
   // `.includes` is the intended duplicate guard — implemented here as such.
   if (state.matches.includes(matchid))
     throw new IllegalStateError('Match has already been registered');
-  if (!Array.isArray(winners) || !Array.isArray(losers))
-    throw new IllegalStateError('winners and losers must be arrays');
-  const all = [...winners, ...losers];
-  if (new Set(all).size !== all.length)
-    throw new IllegalStateError('A user can only appear once in a game');
+  assertValidOutcome(winners, losers);
   return {
     type: 'SEASON_MATCH_REGISTERED',
     data: { matchid, winners, losers, timestamp },
   };
+};
+
+// The correcting/voiding actor is the authenticated principal (see
+// `JwtCookieGuard`), NOT a caller-supplied field — so `correctedBy`/`voidedBy`
+// are derived from the actor, never trusted from the request body.
+export type CorrectMatch = Command<
+  'correctMatch',
+  {
+    matchid: string;
+    winners: string[];
+    losers: string[];
+    reason: string;
+    timestamp: number;
+  }
+>;
+
+export type VoidMatch = Command<
+  'voidMatch',
+  { matchid: string; reason: string; timestamp: number }
+>;
+
+/**
+ * Authorize a correction/void and return the acting player's id (used as the
+ * audit `correctedBy`/`voidedBy`). Only a superuser or a player on record for
+ * the match may modify its outcome.
+ */
+const requireMatchModifier = (
+  state: SeasonState,
+  matchid: string,
+  actor: Actor,
+): string => {
+  if (!actor.id)
+    throw new IllegalStateError('Authentication required to modify a match');
+  if (!actor.superuser) {
+    const participants = state.participants?.[matchid] ?? [];
+    if (!participants.includes(actor.id))
+      throw new IllegalStateError(
+        'Only a superuser or a player in the match can modify it',
+      );
+  }
+  return actor.id;
+};
+
+export const decideCorrectMatch = (
+  state: SeasonState,
+  data: CorrectMatch['data'],
+  actor: Actor,
+): SeasonMatchCorrected => {
+  if (!data.matchid) throw new IllegalStateError('matchid must be set');
+  const correctedBy = requireMatchModifier(state, data.matchid, actor);
+  if (!state.matches.includes(data.matchid))
+    throw new IllegalStateError('Cannot correct an unregistered match');
+  if ((state.voided ?? []).includes(data.matchid))
+    throw new IllegalStateError('Cannot correct a voided match');
+  assertValidOutcome(data.winners, data.losers);
+  return { type: 'SEASON_MATCH_CORRECTED', data: { ...data, correctedBy } };
+};
+
+export const decideVoidMatch = (
+  state: SeasonState,
+  data: VoidMatch['data'],
+  actor: Actor,
+): SeasonMatchVoided => {
+  if (!data.matchid) throw new IllegalStateError('matchid must be set');
+  const voidedBy = requireMatchModifier(state, data.matchid, actor);
+  if (!state.matches.includes(data.matchid))
+    throw new IllegalStateError('Cannot void an unregistered match');
+  if ((state.voided ?? []).includes(data.matchid))
+    throw new IllegalStateError('Match has already been voided');
+  return { type: 'SEASON_MATCH_VOIDED', data: { ...data, voidedBy } };
 };

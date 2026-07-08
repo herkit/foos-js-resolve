@@ -39,7 +39,9 @@ describe('evolveSeasonRanks rating default', () => {
     expect(DEFAULT_RATING).toBe('elo');
     expect(defaulted.rating).toBe('elo');
     // A creation-less stream scores identically to an explicit 'elo' season...
-    expect(rankOf(defaulted, 'a')).toBe(rankOf(fold([created('elo'), ...twoWins]), 'a'));
+    expect(rankOf(defaulted, 'a')).toBe(
+      rankOf(fold([created('elo'), ...twoWins]), 'a'),
+    );
     // ...and NOT like the old 'basic' fallback (proving the default matters).
     expect(rankOf(defaulted, 'a')).not.toBe(
       rankOf(fold([created('basic'), ...twoWins]), 'a'),
@@ -54,5 +56,16 @@ describe('evolveSeasonRanks rating default', () => {
   it("still honours an explicit 'elo' rating from SEASON_CREATED", () => {
     const state = fold([created('elo'), ...twoWins]);
     expect(state.rating).toBe('elo');
+  });
+});
+
+describe('evolveSeasonRanks recentMatches', () => {
+  it('carries each match id so the UI can target a correction/void', () => {
+    const state = fold([created('elo'), match('a', 'b')]);
+    expect(state.recentMatches[0]).toMatchObject({
+      matchid: 'm-a-b',
+      winners: ['a'],
+      losers: ['b'],
+    });
   });
 });
