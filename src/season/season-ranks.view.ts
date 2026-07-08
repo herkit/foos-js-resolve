@@ -1,4 +1,5 @@
 import EloRating from 'elo-rating';
+import { DEFAULT_RATING } from './season.aggregate';
 import type { SeasonEvent } from './season.events';
 
 /**
@@ -92,10 +93,19 @@ const calculateBasic = ({
   return scoreChange;
 };
 
+/**
+ * Defensive default: a well-formed Season stream opens with SEASON_CREATED,
+ * which sets the rating explicitly (see `evolveSeasonRanks`). A handful of
+ * migrated streams were "started" (via a historical reSolve saga bug) but never
+ * "created", so they carry match events with no SEASON_CREATED. Rather than let
+ * those silently fall back to the old `'basic'` scoring, we seed the aggregate's
+ * `DEFAULT_RATING` ('elo') — matching the League/Season aggregate defaults so a
+ * creation-less stream scores the same way a new season would.
+ */
 export const initialSeasonRanks = (): SeasonRanksState => ({
   ranks: [],
   rankhistory: {},
-  rating: 'basic',
+  rating: DEFAULT_RATING,
   recentMatches: [],
 });
 
@@ -113,11 +123,17 @@ export const evolveSeasonRanks = (
 
       const winnerranks = winners.map(
         (player) =>
-          ranks.find(({ id }) => id === player) ?? { id: player, ...defaultRank },
+          ranks.find(({ id }) => id === player) ?? {
+            id: player,
+            ...defaultRank,
+          },
       );
       const loserranks = losers.map(
         (player) =>
-          ranks.find(({ id }) => id === player) ?? { id: player, ...defaultRank },
+          ranks.find(({ id }) => id === player) ?? {
+            id: player,
+            ...defaultRank,
+          },
       );
 
       const totalwinner = winnerranks.reduce((prev, cur) => prev + cur.rank, 0);
@@ -200,10 +216,10 @@ export const evolveSeasonRanks = (
             record: lls.longestLossStreak,
           },
         },
-        recentMatches: [{ timestamp, winners, losers }, ...state.recentMatches].slice(
-          0,
-          5,
-        ),
+        recentMatches: [
+          { timestamp, winners, losers },
+          ...state.recentMatches,
+        ].slice(0, 5),
       };
     }
 
