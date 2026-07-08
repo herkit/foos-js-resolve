@@ -38,6 +38,22 @@ export const executeCommand = async ({
     case 'Season.registerMatch':
       await apiPost(`/seasons/${id}/matches`, payload);
       break;
+    case 'Season.correctMatch': {
+      const { matchid, ...body } = payload;
+      await apiPost(
+        `/seasons/${id}/matches/${encodeURIComponent(matchid)}/correct`,
+        body,
+      );
+      break;
+    }
+    case 'Season.voidMatch': {
+      const { matchid, ...body } = payload;
+      await apiPost(
+        `/seasons/${id}/matches/${encodeURIComponent(matchid)}/void`,
+        body,
+      );
+      break;
+    }
     default:
       throw new Error(`Unknown command ${aggregateName}.${type}`);
   }

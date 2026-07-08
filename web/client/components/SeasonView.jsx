@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 //import { useQuery, useViewModel } from '@resolve-js/react-hooks'
 import { MatchRegistration } from './MatchRegistration';
+import { MatchCorrection } from './MatchCorrection';
 import { PlayerName } from './PlayerName';
 import { useSelector } from 'react-redux';
 import { useReduxViewModel } from '@resolve-js/redux';
@@ -58,6 +59,18 @@ const RecordCard = ({ record }) => (
 const SeasonView = ({ id, leagueId }) => {
   const [showCreateMatch, setShowCreateMatch] = useState(false);
   const [statsPlayer, setStatsPlayer] = useState(null);
+  const [correctingMatch, setCorrectingMatch] = useState(null);
+
+  const me = useSelector((state) => state.jwt);
+
+  // Mirrors the server rule (see decideCorrectMatch): a superuser, or a player
+  // who was in the match, may correct or void it. The backend re-checks, so this
+  // only governs whether we surface the control.
+  const canModify = (match) =>
+    Boolean(
+      me?.superuser ||
+        (me?.id && [...match.winners, ...match.losers].includes(me.id)),
+    );
 
   const {
     connect,
@@ -155,6 +168,7 @@ const SeasonView = ({ id, leagueId }) => {
                 <th className="text-start">When</th>
                 <th className="text-center d-md-table-cell">Winner(s)</th>
                 <th className="text-end">Loser(s)</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -183,6 +197,18 @@ const SeasonView = ({ id, leagueId }) => {
                         <PlayerName playerid={id} />
                       </>
                     ))}
+                  </td>
+                  <td className="text-end">
+                    {canModify(match) ? (
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline-secondary py-0"
+                        title="Correct or void this match"
+                        onClick={() => setCorrectingMatch(match)}
+                      >
+                        Edit
+                      </button>
+                    ) : null}
                   </td>
                 </tr>
               ))}
@@ -216,6 +242,26 @@ const SeasonView = ({ id, leagueId }) => {
           </Modal.Body>
         </Modal>
       </LoggedInContent>
+
+      <Modal
+        fullscreen={'md-down'}
+        show={Boolean(correctingMatch)}
+        onHide={() => setCorrectingMatch(null)}
+      >
+        <Modal.Header closeButton>
+          <h2 className="h5 mb-0">Correct match</h2>
+        </Modal.Header>
+        <Modal.Body>
+          {correctingMatch ? (
+            <MatchCorrection
+              season={id}
+              match={correctingMatch}
+              onCancel={() => setCorrectingMatch(null)}
+              onDone={() => setCorrectingMatch(null)}
+            />
+          ) : null}
+        </Modal.Body>
+      </Modal>
 
       <Modal
         fullscreen={'md-down'}
