@@ -4,8 +4,10 @@ import { Subject } from 'rxjs';
 import { EVENT_STORE } from '../event-store/event-store.constants';
 import { LeagueService } from '../league/league.service';
 import {
+  decideCorrectMatch,
   decideCreateSeason,
   decideRegisterMatch,
+  decideVoidMatch,
   evolveSeason,
   initialSeasonState,
 } from './season.aggregate';
@@ -14,6 +16,9 @@ import {
   initialSeasonRanks,
   type SeasonRanksState,
 } from './season-ranks.view';
+import { applyCorrections } from './season-corrections';
+import type { SeasonEvent } from './season.events';
+import type { Actor } from '../common/actor';
 
 const streamId = (seasonId: string): string => `season-${seasonId}`;
 
@@ -74,16 +79,59 @@ export class SeasonService {
     await this.handle(this.store, streamId(seasonId), (state) =>
       decideRegisterMatch(state, command),
     );
-    const ranks = await this.getRanks(seasonId);
-    this.updates$.next({ seasonId, ranks });
-    return ranks;
+    return this.publishRanks(seasonId);
+  }
+
+  /**
+   * Correct a previously registered match's outcome. Appends a
+   * `SEASON_MATCH_CORRECTED` event; the ranks read-side recomputes from scratch
+   * (with the corrected match in its original position), so every downstream
+   * rating is repaired, not just the two players in the match.
+   */
+  async correctMatch(
+    seasonId: string,
+    input: {
+      matchid: string;
+      winners: string[];
+      losers: string[];
+      reason: string;
+    },
+    actor: Actor,
+  ): Promise<SeasonRanksState> {
+    const command = { ...input, timestamp: Date.now() };
+    await this.handle(this.store, streamId(seasonId), (state) =>
+      decideCorrectMatch(state, command, actor),
+    );
+    return this.publishRanks(seasonId);
+  }
+
+  /** Void a previously registered match; the ranks read-side drops it entirely. */
+  async voidMatch(
+    seasonId: string,
+    input: { matchid: string; reason: string },
+    actor: Actor,
+  ): Promise<SeasonRanksState> {
+    const command = { ...input, timestamp: Date.now() };
+    await this.handle(this.store, streamId(seasonId), (state) =>
+      decideVoidMatch(state, command, actor),
+    );
+    return this.publishRanks(seasonId);
   }
 
   async getRanks(seasonId: string): Promise<SeasonRanksState> {
-    const { state } = await this.store.aggregateStream(streamId(seasonId), {
-      evolve: evolveSeasonRanks,
-      initialState: initialSeasonRanks,
-    });
-    return state ?? initialSeasonRanks();
+    const { events } = await this.store.readStream<SeasonEvent>(
+      streamId(seasonId),
+    );
+    return applyCorrections(events ?? []).reduce(
+      evolveSeasonRanks,
+      initialSeasonRanks(),
+    );
+  }
+
+  /** Recompute ranks and fan the fresh view out to live subscribers. */
+  private async publishRanks(seasonId: string): Promise<SeasonRanksState> {
+    const ranks = await this.getRanks(seasonId);
+    this.updates$.next({ seasonId, ranks });
+    return ranks;
   }
 }

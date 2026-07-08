@@ -6,6 +6,7 @@ import {
   evolveSeasonRanks,
   initialSeasonRanks,
 } from '../season/season-ranks.view';
+import { applyCorrections } from '../season/season-corrections';
 import { LeagueService } from './league.service';
 import {
   accumulateMatch,
@@ -22,10 +23,11 @@ const seasonStreamId = (seasonId: string): string => `season-${seasonId}`;
  * On-demand read facade for a player's league-wide career stats.
  *
  * Mirrors `SeasonService.getRanks`: rather than a persisted projection, it
- * folds each of the league's season streams at query time. The season's final
- * rank comes from reusing `evolveSeasonRanks` verbatim; totals and partner /
- * nemesis tallies are folded from the raw `SEASON_MATCH_REGISTERED` events in
- * the same single pass over each stream.
+ * folds each of the league's season streams at query time. Each stream is first
+ * resolved through `applyCorrections` so corrected/voided matches are reflected;
+ * the season's final rank comes from reusing `evolveSeasonRanks` verbatim, and
+ * totals and partner / nemesis tallies are folded from the resulting effective
+ * `SEASON_MATCH_REGISTERED` events in the same single pass.
  */
 @Injectable()
 export class LeagueStatsService {
@@ -48,13 +50,17 @@ export class LeagueStatsService {
       );
       if (!events?.length) continue;
 
-      const ranks = events.reduce(evolveSeasonRanks, initialSeasonRanks());
+      // Resolve corrections/voids once; both the final-rank fold and the
+      // partner/nemesis tallies below then see the corrected outcomes.
+      const effective = applyCorrections(events);
+
+      const ranks = effective.reduce(evolveSeasonRanks, initialSeasonRanks());
       acc = withSeasonFinalRank(
         acc,
         ranks.ranks.find((r) => r.id === playerId)?.rank,
       );
 
-      for (const event of events) {
+      for (const event of effective) {
         if (event.type === 'SEASON_MATCH_REGISTERED') {
           acc = accumulateMatch(acc, playerId, event.data);
         }
