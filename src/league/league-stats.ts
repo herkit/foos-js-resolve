@@ -11,9 +11,10 @@
  * which covers both 1v1 (one id per side) and 2v2 (two ids per side). Teammates
  * therefore only accrue in 2v2 play; a singles-only league yields no partner.
  *
- * Best/worst teammate and nemeses are ranked by raw counts (most wins together,
- * most losses together, most losses against). Each record still carries the full
- * win/loss tally so the card can display the pairing's win/loss ratio.
+ * Best/worst teammate and nemeses are ranked by a Laplace-smoothed win/loss
+ * ratio (see `smoothedWinRatio`) so small samples aren't over-weighted. Each
+ * record still carries the full, unsmoothed win/loss tally so the card can
+ * display the pairing's real win/loss ratio.
  */
 
 /** A player's head-to-head record with a partner or opponent (from the subject
@@ -154,14 +155,33 @@ export const withSeasonFinalRank = (
 
 export const initialStatsAccumulator = emptyAccumulator;
 
-/** Record with the highest `key` count (must be > 0); null if none. */
-const topBy = (
+/**
+ * Laplace-smoothed win/loss ratios: add 1 to both tallies before dividing so a
+ * tiny sample can't produce an extreme ratio (a lone 1-0 no longer outranks a
+ * seasoned 12-3). This replaced a hard minimum-games cutoff, which gave poor
+ * results. Used ONLY to order records — the returned HeadToHead keeps the real,
+ * unsmoothed counts.
+ */
+const smoothedWinRatio = (r: HeadToHead): number => (r.won + 1) / (r.lost + 1);
+const smoothedLossRatio = (r: HeadToHead): number => (r.lost + 1) / (r.won + 1);
+const encounters = (r: HeadToHead): number => r.won + r.lost;
+
+/** Order by `score` desc, breaking ties toward the larger sample then id, so
+ *  ratio ties resolve deterministically to the better-established pairing. */
+const byScoreDesc =
+  (score: (r: HeadToHead) => number) =>
+  (a: HeadToHead, b: HeadToHead): number =>
+    score(b) - score(a) ||
+    encounters(b) - encounters(a) ||
+    a.playerId.localeCompare(b.playerId);
+
+/** Highest-scoring eligible record; null if none. */
+const topByScore = (
   records: Record<string, HeadToHead>,
-  key: 'won' | 'lost',
+  eligible: (r: HeadToHead) => boolean,
+  score: (r: HeadToHead) => number,
 ): HeadToHead | null =>
-  Object.values(records)
-    .filter((r) => r[key] > 0)
-    .sort((a, b) => b[key] - a[key])[0] ?? null;
+  Object.values(records).filter(eligible).sort(byScoreDesc(score))[0] ?? null;
 
 /** Collapse the accumulator into the public career-card shape. */
 export const finalizeStats = (
@@ -178,10 +198,16 @@ export const finalizeStats = (
     lost: acc.lost,
     highScore: ranks.length ? Math.max(...ranks) : null,
     lowScore: ranks.length ? Math.min(...ranks) : null,
-    bestTeammate: topBy(acc.teammates, 'won'),
-    worstTeammate: topBy(acc.teammates, 'lost'),
+    // Best/worst teammate and nemeses rank by the smoothed ratio; the records
+    // themselves carry the true counts so the UI still shows the real W/L.
+    bestTeammate: topByScore(acc.teammates, (r) => r.won > 0, smoothedWinRatio),
+    worstTeammate: topByScore(
+      acc.teammates,
+      (r) => r.lost > 0,
+      smoothedLossRatio,
+    ),
     nemeses: Object.values(acc.opponents)
       .filter((o) => o.lost > 0)
-      .sort((a, b) => b.lost - a.lost),
+      .sort(byScoreDesc(smoothedLossRatio)),
   };
 };

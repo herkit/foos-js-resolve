@@ -58,7 +58,7 @@ describe('accumulateMatch', () => {
   });
 });
 
-describe('finalizeStats — teammates (by count)', () => {
+describe('finalizeStats — teammates (by smoothed ratio)', () => {
   it('picks best teammate by shared wins and worst by shared losses', () => {
     const acc = foldMatches('me', [
       ...times(2, { winners: ['me', 'ally'], losers: ['a', 'b'] }), // won with ally x2
@@ -81,9 +81,26 @@ describe('finalizeStats — teammates (by count)', () => {
     expect(stats.bestTeammate).toBeNull();
     expect(stats.worstTeammate).toBeNull();
   });
+
+  it('does not let a lone 1-0 pairing outrank a seasoned winning pairing', () => {
+    const acc = foldMatches('me', [
+      // A strong, high-volume pairing: 12-3 together.
+      ...times(12, { winners: ['me', 'rock'], losers: ['a', 'b'] }),
+      ...times(3, { winners: ['a', 'b'], losers: ['me', 'rock'] }),
+      // A single lucky win together: 1-0.
+      { winners: ['me', 'fluke'], losers: ['a', 'b'] },
+    ]);
+    const stats = finalizeStats('L', 'me', acc);
+
+    // Raw ratio would crown the 1-0 pairing (infinite); the smoothed ratio
+    // (13/4 vs 2/1) correctly prefers the established one...
+    expect(stats.bestTeammate?.playerId).toBe('rock');
+    // ...and the returned record keeps the REAL counts, not the +1 smoothed ones.
+    expect(stats.bestTeammate).toEqual({ playerId: 'rock', won: 12, lost: 3 });
+  });
 });
 
-describe('finalizeStats — nemeses (by losses)', () => {
+describe('finalizeStats — nemeses (by smoothed ratio)', () => {
   it('orders opponents by losses-against descending, keeping the full record', () => {
     const acc = foldMatches('me', [
       ...times(3, { winners: ['x'], losers: ['me'] }), // lost to x x3
@@ -96,6 +113,24 @@ describe('finalizeStats — nemeses (by losses)', () => {
     expect(stats.nemeses).toEqual([
       { playerId: 'x', won: 1, lost: 3 },
       { playerId: 'y', won: 0, lost: 1 },
+    ]);
+  });
+
+  it('ranks a heavier losing record above a lone loss (smoothed ratio)', () => {
+    const acc = foldMatches('me', [
+      // 2-6 against 'heavy' — a real nemesis by ratio and volume.
+      ...times(6, { winners: ['heavy'], losers: ['me'] }),
+      ...times(2, { winners: ['me'], losers: ['heavy'] }),
+      // 0-1 against 'blip' — a single loss.
+      { winners: ['blip'], losers: ['me'] },
+    ]);
+    const stats = finalizeStats('L', 'me', acc);
+
+    // heavy: (6+1)/(2+1)=2.33 ranks above blip: (1+1)/(0+1)=2.0, and records
+    // stay raw.
+    expect(stats.nemeses).toEqual([
+      { playerId: 'heavy', won: 2, lost: 6 },
+      { playerId: 'blip', won: 0, lost: 1 },
     ]);
   });
 });
