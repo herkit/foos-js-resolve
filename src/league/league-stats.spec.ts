@@ -1,11 +1,18 @@
 import {
   accumulateMatch,
+  DEFAULT_RANKING_OPTIONS,
   emptyPlayerLeagueStats,
   finalizeStats,
   initialStatsAccumulator,
+  RANKING_ENV,
+  rankingOptionsFromEnv,
   withSeasonFinalRank,
   type StatsAccumulator,
 } from './league-stats';
+
+// Ordering tests care about the sort, not the sample-size gate — relax the gate
+// (minMatches: 1) so small fixtures still qualify. Gating has its own tests.
+const RELAXED = { minMatches: 1, smoothing: 1 };
 
 const foldMatches = (
   playerId: string,
@@ -65,7 +72,7 @@ describe('finalizeStats — teammates (by smoothed ratio)', () => {
       ...times(2, { winners: ['a', 'b'], losers: ['me', 'burden'] }), // lost with burden x2
       { winners: ['me', 'burden'], losers: ['a', 'b'] }, // won with burden once
     ]);
-    const stats = finalizeStats('L', 'me', acc);
+    const stats = finalizeStats('L', 'me', acc, RELAXED);
 
     expect(stats.bestTeammate).toEqual({ playerId: 'ally', won: 2, lost: 0 });
     expect(stats.worstTeammate).toEqual({
@@ -82,21 +89,52 @@ describe('finalizeStats — teammates (by smoothed ratio)', () => {
     expect(stats.worstTeammate).toBeNull();
   });
 
-  it('does not let a lone 1-0 pairing outrank a seasoned winning pairing', () => {
-    const acc = foldMatches('me', [
-      // A strong, high-volume pairing: 12-3 together.
-      ...times(12, { winners: ['me', 'rock'], losers: ['a', 'b'] }),
-      ...times(3, { winners: ['a', 'b'], losers: ['me', 'rock'] }),
-      // A single lucky win together: 1-0.
-      { winners: ['me', 'fluke'], losers: ['a', 'b'] },
+  // Two eligible pairings (gate relaxed) that disagree under raw vs smoothed
+  // ordering, so this isolates the smoothing knob.
+  const rockAndFluke = () =>
+    foldMatches('me', [
+      ...times(12, { winners: ['me', 'rock'], losers: ['a', 'b'] }), // 12-0
+      ...times(3, { winners: ['a', 'b'], losers: ['me', 'rock'] }), //  +0-3 => 12-3
+      { winners: ['me', 'fluke'], losers: ['a', 'b'] }, // 1-0
     ]);
-    const stats = finalizeStats('L', 'me', acc);
 
-    // Raw ratio would crown the 1-0 pairing (infinite); the smoothed ratio
-    // (13/4 vs 2/1) correctly prefers the established one...
+  it('smoothing keeps a lone 1-0 pairing from outranking a seasoned one', () => {
+    const stats = finalizeStats('L', 'me', rockAndFluke(), {
+      minMatches: 1,
+      smoothing: 1,
+    });
+    // Smoothed 13/4=3.25 (rock) vs 2/1=2.0 (fluke) -> rock...
     expect(stats.bestTeammate?.playerId).toBe('rock');
     // ...and the returned record keeps the REAL counts, not the +1 smoothed ones.
     expect(stats.bestTeammate).toEqual({ playerId: 'rock', won: 12, lost: 3 });
+  });
+
+  it('smoothing: 0 reverts to the raw ratio (the 1-0 wins)', () => {
+    const stats = finalizeStats('L', 'me', rockAndFluke(), {
+      minMatches: 1,
+      smoothing: 0,
+    });
+    // Raw 12/3=4 (rock) vs 1/0=Infinity (fluke) -> fluke.
+    expect(stats.bestTeammate?.playerId).toBe('fluke');
+  });
+
+  it('excludes teammates below the minMatches gate', () => {
+    const acc = foldMatches('me', [
+      ...times(5, { winners: ['me', 'seasoned'], losers: ['a', 'b'] }), // 5 games
+      ...times(4, { winners: ['me', 'green'], losers: ['a', 'b'] }), // 4 games, all wins
+    ]);
+    // Default gate is 5: 'green' (4 games) is excluded despite a perfect record.
+    const stats = finalizeStats('L', 'me', acc);
+    expect(stats.bestTeammate?.playerId).toBe('seasoned');
+  });
+
+  it('returns null when no pairing clears the gate', () => {
+    const acc = foldMatches('me', [
+      ...times(3, { winners: ['me', 'ally'], losers: ['a', 'b'] }),
+    ]);
+    const stats = finalizeStats('L', 'me', acc); // default minMatches: 5
+    expect(stats.bestTeammate).toBeNull();
+    expect(stats.worstTeammate).toBeNull();
   });
 });
 
@@ -108,7 +146,7 @@ describe('finalizeStats — nemeses (by smoothed ratio)', () => {
       { winners: ['y'], losers: ['me'] }, // lost to y once
       { winners: ['me'], losers: ['z'] }, // only ever beat z — not a nemesis
     ]);
-    const stats = finalizeStats('L', 'me', acc);
+    const stats = finalizeStats('L', 'me', acc, RELAXED);
 
     expect(stats.nemeses).toEqual([
       { playerId: 'x', won: 1, lost: 3 },
@@ -124,7 +162,7 @@ describe('finalizeStats — nemeses (by smoothed ratio)', () => {
       // 0-1 against 'blip' — a single loss.
       { winners: ['blip'], losers: ['me'] },
     ]);
-    const stats = finalizeStats('L', 'me', acc);
+    const stats = finalizeStats('L', 'me', acc, RELAXED);
 
     // heavy: (6+1)/(2+1)=2.33 ranks above blip: (1+1)/(0+1)=2.0, and records
     // stay raw.
@@ -132,6 +170,44 @@ describe('finalizeStats — nemeses (by smoothed ratio)', () => {
       { playerId: 'heavy', won: 2, lost: 6 },
       { playerId: 'blip', won: 0, lost: 1 },
     ]);
+  });
+
+  it('excludes opponents below the minMatches gate', () => {
+    const acc = foldMatches('me', [
+      ...times(5, { winners: ['regular'], losers: ['me'] }), // lost to regular x5
+      ...times(2, { winners: ['stranger'], losers: ['me'] }), // lost to stranger x2
+    ]);
+    // Default gate is 5: only 'regular' qualifies as a nemesis.
+    const stats = finalizeStats('L', 'me', acc);
+    expect(stats.nemeses).toEqual([{ playerId: 'regular', won: 0, lost: 5 }]);
+  });
+});
+
+describe('rankingOptionsFromEnv', () => {
+  it('falls back to defaults when unset', () => {
+    expect(rankingOptionsFromEnv({})).toEqual(DEFAULT_RANKING_OPTIONS);
+  });
+
+  it('reads the two knobs from the environment', () => {
+    const opts = rankingOptionsFromEnv({
+      [RANKING_ENV.minMatches]: '10',
+      [RANKING_ENV.smoothing]: '2',
+    });
+    expect(opts).toEqual({ minMatches: 10, smoothing: 2 });
+  });
+
+  it('ignores non-numeric or negative values, keeping the defaults', () => {
+    const opts = rankingOptionsFromEnv({
+      [RANKING_ENV.minMatches]: 'lots',
+      [RANKING_ENV.smoothing]: '-1',
+    });
+    expect(opts).toEqual(DEFAULT_RANKING_OPTIONS);
+  });
+
+  it('allows smoothing of 0 (raw ratio)', () => {
+    expect(
+      rankingOptionsFromEnv({ [RANKING_ENV.smoothing]: '0' }).smoothing,
+    ).toBe(0);
   });
 });
 

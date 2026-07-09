@@ -12,9 +12,10 @@
  * therefore only accrue in 2v2 play; a singles-only league yields no partner.
  *
  * Best/worst teammate and nemeses are ranked by a Laplace-smoothed win/loss
- * ratio (see `smoothedWinRatio`) so small samples aren't over-weighted. Each
- * record still carries the full, unsmoothed win/loss tally so the card can
- * display the pairing's real win/loss ratio.
+ * ratio among pairings that clear a minimum-games gate — both knobs are tunable
+ * (see `RankingOptions` / `rankingOptionsFromEnv`). Each record still carries
+ * the full, unsmoothed win/loss tally so the card can display the pairing's
+ * real win/loss ratio.
  */
 
 /** A player's head-to-head record with a partner or opponent (from the subject
@@ -156,15 +157,67 @@ export const withSeasonFinalRank = (
 export const initialStatsAccumulator = emptyAccumulator;
 
 /**
- * Laplace-smoothed win/loss ratios: add 1 to both tallies before dividing so a
- * tiny sample can't produce an extreme ratio (a lone 1-0 no longer outranks a
- * seasoned 12-3). This replaced a hard minimum-games cutoff, which gave poor
- * results. Used ONLY to order records — the returned HeadToHead keeps the real,
- * unsmoothed counts.
+ * How best/worst teammate and nemeses are ranked. Two knobs, both tunable via
+ * env (see `rankingOptionsFromEnv`) so they can be dialled against real data:
+ *
+ *  - `minMatches`: a pairing must have at least this many games (together, or
+ *    against) to be ranked at all — a sample-size floor that keeps one-off
+ *    pairings out of the card.
+ *  - `smoothing`: Laplace strength `k` added to both tallies before dividing,
+ *    so among the eligible a tiny record can't produce an extreme ratio (a 5-0
+ *    doesn't automatically top a 40-8). `k = 0` gives the raw ratio.
  */
-const smoothedWinRatio = (r: HeadToHead): number => (r.won + 1) / (r.lost + 1);
-const smoothedLossRatio = (r: HeadToHead): number => (r.lost + 1) / (r.won + 1);
+export interface RankingOptions {
+  minMatches: number;
+  smoothing: number;
+}
+
+export const DEFAULT_RANKING_OPTIONS: RankingOptions = {
+  minMatches: 5,
+  smoothing: 1,
+};
+
+/** Env override names for the two ranking knobs. */
+export const RANKING_ENV = {
+  minMatches: 'CAREER_STATS_MIN_MATCHES',
+  smoothing: 'CAREER_STATS_SMOOTHING',
+} as const;
+
+const parseNonNegative = (
+  value: string | undefined,
+  fallback: number,
+): number => {
+  if (value === undefined || value.trim() === '') return fallback;
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 0) return fallback;
+  return n;
+};
+
+/**
+ * Resolve ranking options from the environment, falling back to defaults. Pure
+ * in `env` (defaults to `process.env`) so it can be unit-tested directly.
+ */
+export const rankingOptionsFromEnv = (
+  env: NodeJS.ProcessEnv = process.env,
+): RankingOptions => ({
+  minMatches: parseNonNegative(
+    env[RANKING_ENV.minMatches],
+    DEFAULT_RANKING_OPTIONS.minMatches,
+  ),
+  smoothing: parseNonNegative(
+    env[RANKING_ENV.smoothing],
+    DEFAULT_RANKING_OPTIONS.smoothing,
+  ),
+});
+
 const encounters = (r: HeadToHead): number => r.won + r.lost;
+
+// Laplace-smoothed win/loss ratios with strength `k`. Used ONLY to order
+// records — the returned HeadToHead keeps the real, unsmoothed counts.
+const winRatio = (r: HeadToHead, k: number): number =>
+  (r.won + k) / (r.lost + k);
+const lossRatio = (r: HeadToHead, k: number): number =>
+  (r.lost + k) / (r.won + k);
 
 /** Order by `score` desc, breaking ties toward the larger sample then id, so
  *  ratio ties resolve deterministically to the better-established pairing. */
@@ -188,8 +241,11 @@ export const finalizeStats = (
   leagueId: string,
   playerId: string,
   acc: StatsAccumulator,
+  options: RankingOptions = DEFAULT_RANKING_OPTIONS,
 ): PlayerLeagueStats => {
+  const { minMatches, smoothing } = options;
   const ranks = acc.seasonFinalRanks;
+  const enoughGames = (r: HeadToHead): boolean => encounters(r) >= minMatches;
   return {
     leagueId,
     playerId,
@@ -198,16 +254,21 @@ export const finalizeStats = (
     lost: acc.lost,
     highScore: ranks.length ? Math.max(...ranks) : null,
     lowScore: ranks.length ? Math.min(...ranks) : null,
-    // Best/worst teammate and nemeses rank by the smoothed ratio; the records
-    // themselves carry the true counts so the UI still shows the real W/L.
-    bestTeammate: topByScore(acc.teammates, (r) => r.won > 0, smoothedWinRatio),
+    // Rank by the smoothed ratio among pairings that clear the match-count
+    // gate; the records themselves carry the true counts so the UI shows real
+    // W/L.
+    bestTeammate: topByScore(
+      acc.teammates,
+      (r) => enoughGames(r) && r.won > 0,
+      (r) => winRatio(r, smoothing),
+    ),
     worstTeammate: topByScore(
       acc.teammates,
-      (r) => r.lost > 0,
-      smoothedLossRatio,
+      (r) => enoughGames(r) && r.lost > 0,
+      (r) => lossRatio(r, smoothing),
     ),
     nemeses: Object.values(acc.opponents)
-      .filter((o) => o.lost > 0)
-      .sort(byScoreDesc(smoothedLossRatio)),
+      .filter((o) => enoughGames(o) && o.lost > 0)
+      .sort(byScoreDesc((r) => lossRatio(r, smoothing))),
   };
 };
