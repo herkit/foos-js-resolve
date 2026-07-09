@@ -12,6 +12,7 @@ import {
   accumulateMatch,
   finalizeStats,
   initialStatsAccumulator,
+  rankingOptionsFromEnv,
   withSeasonFinalRank,
   type PlayerLeagueStats,
   type StatsAccumulator,
@@ -67,6 +68,6 @@ export class LeagueStatsService {
       }
     }
 
-    return finalizeStats(leagueId, playerId, acc);
+    return finalizeStats(leagueId, playerId, acc, rankingOptionsFromEnv());
   }
 }
